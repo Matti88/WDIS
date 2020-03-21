@@ -26444,16 +26444,30 @@
 
     <main role="main" class="container">
 
-        <div class="starter-template">
-            <h1>Bootstrap starter template</h1>
-            <p class="lead">Use this document as a way to quickly start any new project.<br> All you get is this text
-                and a mostly barebones HTML document.</p>
-        </div>
-        <div>
-            <div id="div1" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
-
-            <img id="drag1" src="img_logo.gif" draggable="true" ondragstart="drag(event)" width="336" height="69">
-        </div>
+        <div class="container">
+            <div class="row">
+              <div class="col">
+          
+                <h1>Upload an image</h1>
+                <hr>
+          
+                <form action="/upload-image" method="POST" enctype="multipart/form-data">
+          
+                  <div class="form-group">
+                    <label>Select image</label>
+                    <div class="custom-file">
+                      <input type="file" class="custom-file-input" name="image" id="image">
+                      <label class="custom-file-label" for="image">Select image...</label>
+                    </div>
+                  </div>
+          
+                  <button type="submit" class="btn btn-primary">Upload</button>
+          
+                </form>
+          
+              </div>
+            </div>
+          </div>
     </main><!-- /.container -->
 
     <!-- Bootstrap core JavaScript
@@ -26461,10 +26475,15 @@
     <!-- Placed at the end of the document so the pages load faster -->
     <script src="static/jquery-3.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
         crossorigin="anonymous"></script>
-    <script>window.jQuery || document.write('<script src="../../assets/js/vendor/jquery-slim.min.js"><\/script>')</script>
+    <script>window.jQuery || document.write('<script src="static/js/jquery-slim.min.js"><\/script>')</script>
     <script src="static/popper.js"></script>
     <script src="static/bootstrap.js"></script>
-
+<script>
+    $("#image").change(function() {
+  filename = this.files[0].name
+  console.log(filename);
+});
+</script>
 
 </body>
 
