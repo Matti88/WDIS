@@ -1,6 +1,7 @@
 #set FLASK_ENV=development
 
 import os
+import mimetypes
 from flask import Flask
 from flask import render_template, send_from_directory,request, redirect
 app = Flask(__name__)
@@ -30,13 +31,6 @@ def hello():
     '''
     return render_template("index.html")
 
-
-@app.route('/static/<path:path>')
-def send_js(path):
-    '''
-    Route Utility: serves the static files. If they are updated then no re-uploas
-    '''
-    return send_from_directory('static', path)
 
 @app.route("/upload-OCpR_file", methods=["GET", "POST"])
 def upload_OCpR_file():
