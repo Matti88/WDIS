@@ -66,7 +66,9 @@ def launchProcess():
     '''
     
     if request.method == "GET":
-        print(request.headers)
+        # print("File to Elaborate:")
+        # print(request.query_string.replace('fileName=', ''))
+        print(request.query_string)
 
      
     return ('', 204)

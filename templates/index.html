@@ -26448,7 +26448,7 @@
                         <div class="form-group">
                             <label>Upload OCpR_file</label>
                             <div class="custom-file">
-                                <input type="file" class="custom-file-input" name="file" id="OCpR_file2">
+                                <input type="text" class="custom-file-input" name="fileName" id="OCpR_file2">
                                 <label class="custom-file-label" id="loadedUpFile"></label>
                             </div>
 
@@ -26481,7 +26481,7 @@
             function () {
                 var _text = $('#fileLabel').text();
                 $('#loadedUpFile').text(_text);
-                $('#OCpR_file2').value = _text;
+                $('#OCpR_file2').val(_text);
                 $('#fileLabel').text("Select image...");
             });
 
