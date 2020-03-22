@@ -65,7 +65,7 @@ def launchProcess():
         print(request.query_string)
 
      
-    return ('', 204)
+    return ('', 202)
     
 
 if __name__ == '__main__':
