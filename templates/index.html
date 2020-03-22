@@ -26387,7 +26387,7 @@
             display: none !important;
         }
     </style>
- 
+
 </head>
 
 <body>
@@ -26430,28 +26430,31 @@
                                 <label class="custom-file-label" id="fileLabel" for="OCpR_file">Select image...</label>
                             </div>
                         </div>
-                        <button type="submit" class="btn btn-primary" id="uploadButn" >Upload</button>
+                        <button type="submit" class="btn btn-primary" id="uploadButn">Upload</button>
                     </form>
 
                 </div>
 
             </div>
         </div>
-        <br/>
+        <br />
         <div class="container">
             <div class="row">
                 <div class="col">
 
                     <h2>Uploaded Files</h2>
                     <hr>
-                    <form  action="/launchProcess_OCpR_file" method="GET" enctype="multipart/form-data">
-                        <div>
-                            <label id="loadedUpFile"></label>
+                    <form id="OCpR_Run_Form" action="/launchProcess_OCpR_file" method="GET">
+                        <div class="form-group">
+                            <label>Upload OCpR_file</label>
+                            <div class="custom-file">
+                                <input type="file" class="custom-file-input" name="file" id="OCpR_file2">
+                                <label class="custom-file-label" id="loadedUpFile"></label>
+                            </div>
+
                         </div>
-                        <div>
-                            <button type="submit" class="btn btn-primary" id="prcsCal">Calculate OCpR</button>
-                        </div>
-                     </form>
+                        <button type="submit" class="btn btn-primary" for="OCpR_file2" id="prcsCal">Calculate OCpR</button>
+                    </form>
 
                 </div>
             </div>
@@ -26469,28 +26472,25 @@
     <script src="static/bootstrap.js" language="javascript" type="text/javascript"></script>
 
     <script language="javascript" type="text/javascript">
-
         $("#OCpR_file").change(function () {
-            var pathLoaded = this.value.replace("C:\\fakepath\\","");
-            $('#fileLabel').text(pathLoaded); 
-            });
-        
+            var pathLoaded = this.value.replace("C:\\fakepath\\", "");
+            $('#fileLabel').text(pathLoaded);
+        });
+
         $("#uploadButn").click(
             function () {
                 var _text = $('#fileLabel').text();
-                console.log(_text);
                 $('#loadedUpFile').text(_text);
-                $('#fileLabel').text("Select image..."); 
-             });
+                $('#OCpR_file2').value = _text;
+                $('#fileLabel').text("Select image...");
+            });
 
         $("#prcsCal").click(
             function () {
-            $('#loadedUpFile').text("");
-        });
-
-             
+                $('#loadedUpFile').text("");
+            });
     </script>
- 
+
 </body>
 
 </html>

@@ -66,7 +66,7 @@ def launchProcess():
     '''
     
     if request.method == "GET":
-        print(request)
+        print(request.headers)
 
      
     return ('', 204)
