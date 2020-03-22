@@ -26387,22 +26387,7 @@
             display: none !important;
         }
     </style>
-
-    <script>
-        function allowDrop(ev) {
-            ev.preventDefault();
-        }
-
-        function drag(ev) {
-            ev.dataTransfer.setData("text", ev.target.id);
-        }
-
-        function drop(ev) {
-            ev.preventDefault();
-            var data = ev.dataTransfer.getData("text");
-            ev.target.appendChild(document.getElementById(data));
-        }
-    </script>
+ 
 </head>
 
 <body>
@@ -26431,43 +26416,81 @@
 
         <div class="container">
             <div class="row">
-              <div class="col">
-          
-                <h1>Upload an OCpR Model</h1>
-                <hr>
-          
-                <form action="/upload-OCpR_file" method="POST" enctype="multipart/form-data">
-          
-                  <div class="form-group">
-                    <label>Select OCpR_file</label>
-                    <div class="custom-file">
-                      <input type="file" class="custom-file-input" name="OCpR_file" id="OCpR_file">
-                      <label class="custom-file-label" id="fileLabel" for="OCpR_file">Select image...</label>
-                    </div>
-                  </div>
-          
-                  <button type="submit" class="btn btn-primary">Upload</button>
-                  <button type="submit" class="btn btn-primary">Calculate OCpR</button>
-                </form>
-          
-              </div>
+                <div class="col">
+
+                    <h1>Upload an OCpR Model</h1>
+                    <hr>
+
+                    <form id="calcForm" action="/upload-OCpR_file" method="POST" enctype="multipart/form-data">
+
+                        <div class="form-group">
+                            <label>Select OCpR_file</label>
+                            <div class="custom-file">
+                                <input type="file" class="custom-file-input" name="file" id="OCpR_file">
+                                <label class="custom-file-label" id="fileLabel" for="OCpR_file">Select image...</label>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary" id="uploadButn" >Upload</button>
+                    </form>
+
+                </div>
+
             </div>
-          </div>
+        </div>
+        <br/>
+        <div class="container">
+            <div class="row">
+                <div class="col">
+
+                    <h2>Uploaded Files</h2>
+                    <hr>
+                    <form  action="/launchProcess_OCpR_file" method="GET" enctype="multipart/form-data">
+                        <div>
+                            <label id="loadedUpFile"></label>
+                        </div>
+                        <div>
+                            <button type="submit" class="btn btn-primary" id="prcsCal">Calculate OCpR</button>
+                        </div>
+                     </form>
+
+                </div>
+            </div>
+        </div>
     </main><!-- /.container -->
 
     <!-- Bootstrap core JavaScript
     ================================================== -->
     <!-- Placed at the end of the document so the pages load faster -->
-    <script src="static/jquery-3.js" ></script>
-    <script>window.jQuery || document.write('<script src="static/js/jquery-slim.min.js"><\/script>')</script>
-    <script src="static/popper.js"></script>
-    <script src="static/bootstrap.js"></script>
-<script>
-    $("#OCpR_file").change(function() {
-        $('#fileLabel').text(this.value);
-});
-</script>
+    <script src="static/js/jquery-3.js"></script>
+    <script>
+        window.jQuery || document.write('<script src="static/js/jquery-3.js"><\/script>')
+    </script>
+    <script src="static/popper.js" language="javascript" type="text/javascript"></script>
+    <script src="static/bootstrap.js" language="javascript" type="text/javascript"></script>
 
+    <script language="javascript" type="text/javascript">
+
+        $("#OCpR_file").change(function () {
+            var pathLoaded = this.value.replace("C:\\fakepath\\","");
+            $('#fileLabel').text(pathLoaded); 
+            });
+        
+        $("#uploadButn").click(
+            function () {
+                var _text = $('#fileLabel').text();
+                console.log(_text);
+                $('#loadedUpFile').text(_text);
+                $('#fileLabel').text("Select image..."); 
+             });
+
+        $("#prcsCal").click(
+            function () {
+            $('#loadedUpFile').text("");
+        });
+
+             
+    </script>
+ 
 </body>
 
 </html>

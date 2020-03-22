@@ -6,7 +6,7 @@ from flask import render_template, send_from_directory,request, redirect
 app = Flask(__name__)
 
 app.config["OCpR_file_UPLOADS"] = "C:\\Users\\zuzan\\Desktop\\Projects\\steal\\uploads"
-app.config["ALLOWED_OCpR_file_EXTENSIONS"] = ["XLX"]
+app.config["ALLOWED_OCpR_file_EXTENSIONS"] = ["XLSX"]
 
 def allowed_image(filename):
     '''
@@ -48,19 +48,28 @@ def upload_OCpR_file():
 
         if request.files:
 
-            OCpR_file = request.files["OCpR_file"]
+            OCpR_file = request.files["file"]
 
             if OCpR_file.filename == "":
-                print("No filename")
                 return redirect("index")
 
             if allowed_image(OCpR_file.filename):
                 OCpR_file.save(os.path.join(app.config["OCpR_file_UPLOADS"], OCpR_file.filename))
+    
+    return ('', 204)
 
-                print("OCpR_file saved")
 
-    return redirect("index")
+@app.route("/launchProcess_OCpR_file", methods=["GET"])
+def launchProcess():
+    '''
+    Route Process Function: start to process the OCpR
+    '''
+    
+    if request.method == "GET":
+        print(request)
 
+     
+    return ('', 204)
     
 
 if __name__ == '__main__':
