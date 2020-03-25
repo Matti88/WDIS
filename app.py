@@ -20,11 +20,12 @@ def allowed_image(filename):
 
     if ext.upper() in app.config["ALLOWED_OCpR_file_EXTENSIONS"]:
         return True
+        
     else:
         return False
 
 @app.route('/')
-@app.route('/index')
+@app.route('/index')  
 def hello():
     ''''
     Route Function: main page
