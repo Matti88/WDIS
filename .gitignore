@@ -1,4 +1,4 @@
 .vscode/
-*.ipynb*
+*.ipynb_checkpoints
 *.ods
 *.xls
