@@ -3,12 +3,13 @@
 import os
 import mimetypes 
 import copy
+import pandas as pd
 import Conf_Calculator as CC
 from flask import Flask
 from flask import render_template, send_from_directory,request, redirect
 app = Flask(__name__)
 
-app.config["OCpR_file_UPLOADS"] = "C:\\Users\\zuzan\\Desktop\\Projects\\steal\\uploads"
+app.config["OCpR_file_UPLOADS"] = ".\\uploads"
 app.config["ALLOWED_OCpR_file_EXTENSIONS"] = ["XLSX"]
 
 
@@ -66,10 +67,12 @@ def launchProcess():
     if request.method == "GET":
         # print("File to Elaborate:")
         # print(request.query_string.replace('fileName=', ''))
-        name_of_the_file = request.args.get('fileName'))
-        dataFrame = pd.read_excel('.\uploads\\' + name_of_the_file )
+        # print(request.args.get('fileName'))
+        name_of_the_file = request.args.get('fileName')
+        file_ = os.getcwd() + r"\uploads" + '\\' + name_of_the_file 
 
-        dfs, details_dfs                    = CC.dataframes_splitter(dataFrame)
+
+        dfs, details_dfs                    = CC.dataframes_splitter(path_to_the_file=file_)
         OCpR                                = CC.loop_thru_dataframes(dfs)
         OCpR_staked, OCpR_tags              = CC.OCpR_stacker(OCpR)
         details_dfs.insert(0,OCpR_staked)

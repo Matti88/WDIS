@@ -89,7 +89,6 @@ def OCpR_stacker(df):
     rows_to_stack = [] 
     for row in OCpR_stackable.iterrows():
         conf_number = row[0]
-        example = row
         col_ = 1
         elements_to_stuck = []
         for elem_ in row[1]: 
