@@ -5,6 +5,7 @@ import mimetypes
 import copy
 import pandas as pd
 import Conf_Calculator as CC
+import Conf_Checker as CE
 from flask import Flask
 from flask import render_template, send_from_directory,request, redirect
 app = Flask(__name__)
@@ -35,6 +36,13 @@ def hello():
     Route Function: main page
     '''
     return render_template("index.html")
+
+@app.route('/cheker')  
+def cheker():
+    ''''
+    Route Function: main page
+    '''
+    return render_template("file_checker.html")
 
 
 @app.route("/upload-OCpR_file", methods=["GET", "POST"])
@@ -97,7 +105,22 @@ def launchProcess():
      
 
     return final_df[['q_by_Lp','q_by_Sp']].to_json(orient='records')
-    
+
+@app.route("/Checker_OCpR_file", methods=["GET"])
+def Checker_OCpR():
+    '''
+    Route Process Function: start to process the OCpR
+    '''
+    data = None
+    if request.method == "GET":
+        # print("File to Elaborate:")
+        # print(request.query_string.replace('fileName=', ''))
+        data = CE.comb_estimator('.\\uploads\\' + request.args.get('fileName'))
+        
+
+    #return render_template("index.html")
+    return data
+  
 
 if __name__ == '__main__':
     app.run()
