@@ -1,17 +1,34 @@
 {% extends "baseTemp/base.html" %}
  
 {% block main %}
-    <main role="main" class="container">
-
+<main role="main" class="container" style="max-width: 1800px;">
+    <div class="row">
+        <div class="col">
+            <div class="jumbotron">
+                <h1 class="display-4">Welcome to the "Where do I stand" (W.d.I.s) calculator!</h1>
+                <p class="lead">Upload the model files for your Company's products and your Target Competitor's </p>
+                <hr class="my-4">
+                <p>
+                    <strong>How to process a file ?</strong>
+                    Upload a file in .xlsx or .xls format and click on 'Upload and Validate'. If you recevie a green confirmation message you then click 
+                    on 'Calculate OCpR' to see the List vs Plot comparison.
+                </p>
+                <p>
+                    <strong>How can I get the generated model?</strong>
+                    It will be possible with a simple one time subscription of only 10$
+                </p>
+              </div>
+        </div>
+    </div>
+</br>
+    <div class="row">
+    <div id="myCompany" class="col">
         <div class="container">
             <div class="row">
                 <div class="col">
-
-                    <h1>Upload an OCpR Model</h1>
+                    <h1>Your Company Model</h1>
                     <hr>
-
                     <form id="calcForm" action="/upload-OCpR_file" method="POST" enctype="multipart/form-data">
-
                         <div class="form-group">
                             <label>Select OCpR_file</label>
                             <div class="custom-file">
@@ -19,18 +36,33 @@
                                 <label class="custom-file-label" id="fileLabel" for="OCpR_file">Select file...</label>
                             </div>
                         </div>
-                        <button type="submit" class="btn btn-primary" id="uploadButn">Upload</button>
+                        <button type="submit" class="btn btn-primary" id="uploadButn">Upload and Validate</button>
                     </form>
-
                 </div>
-
             </div>
         </div>
         <br />
         <div class="container">
+            <div class="alert alert-success" role="alert">
+                <h4 class="alert-heading">Well done!</h4>
+                <p>Aww yeah, you successfully read this important alert message. This example text is going to run a bit longer so that you can see how spacing within an alert works with this kind of content.</p>
+                <hr>
+                <p class="mb-0">Whenever you need to, be sure to use margin utilities to keep things nice and tidy.</p>
+            </div>
+            <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                <strong>Holy guacamole!</strong> You should check in on some of those fields below.
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="alert alert-danger" role="alert">
+                A simple danger alert with <a href="#" class="alert-link">an example link</a>. Give it a click if you like.
+            </div>
+    
+        </div>
+        <div class="container">
             <div class="row">
                 <div class="col">
-
                     <h2>Uploaded Files</h2>
                     <hr>
                     <form id="OCpR_Run_Form" action="/Checker_OCpR_file" method="GET">
@@ -40,146 +72,81 @@
                                 <input type="text" class="custom-file-input" name="fileName" id="OCpR_file2">
                                 <label class="custom-file-label" id="loadedUpFile"></label>
                             </div>
-
                         </div>
                         <button type="submit" class="btn btn-primary" for="OCpR_file2" id="prcsCal">Calculate OCpR</button>
                     </form>
-
                 </div>
-            </div>
-        </div>
-
-        <div class="container">
-            <div style="padding: 25px;">
-                <h3>Calculation Output</h3>  
-            
-                    <p style="padding-top: 10px;">
-                        <button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#collapseExample" aria-expanded="false" aria-controls="collapseExample">
-                          Usage
-                        </button>
-                        </p>
-                      <div class="collapse" id="collapseExample">
-                        <div class="card card-body">
-                            <p>
-                                <strong>How to process a file ?</strong>
-                                Upload a file in .xlsx or .csv format and click on 'Process'.
-                            </p>
-            
-                            <p>
-                                <strong>Need to process another file ?</strong>
-                                If you want to process another file, please reload the page and repeat previous step.
-                            </p>
-            
-                            <p>
-                                If there is any issue, please contact Katarina_Bedejova@dell.com
-                            </p>
-                        </div>
-                      </div>
-            
-            </div>
-            
-            
-            <div class="card ">
-                <div class="card-header"> 
-                  <ul class="nav nav-tabs card-header-tabs pull-right"  id="myTab" role="tablist">
-                    <li class="nav-item">
-                     <a class="nav-link active" id="home-tab" data-toggle="tab" href="#home" role="tab" aria-controls="home" aria-selected="true">Output</a>
-                    </li>
-                    <li class="nav-item">
-                      <a class="nav-link" id="profile-tab" data-toggle="tab" href="#profile" role="tab" aria-controls="profile" aria-selected="false">Warnings<span class="badge badge-light">{{warning_count}}</span></a>
-                    </li>
-                    <li class="nav-item">
-                      <a class="nav-link" id="contact-tab" data-toggle="tab" href="#contact" role="tab" aria-controls="contact" aria-selected="false">Errors<span class="badge badge-light">{{error_count}}</span></a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" id="est-tab" data-toggle="tab" href="#est">Estimation</a>
-                      </li>
-                  </ul>
-                </div>
-                <div class="card-body">
-                    <div class="tab-content" id="myTabContent">
-                        <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
-                            <div id="target_div" style="overflow-y: scroll; height: 300px;">
-                                <div id="output-main">
-                                </div>
-                            </div>
-                        </div>
-                        <div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab">
-                            <div id="target_div_warnings" style="overflow-y: scroll; height: 300px;">
-                                <div id="output-warnings">
-                                </div>
-                            </div>
-                        </div>
-                        <div class="tab-pane fade" id="contact" role="tabpanel" aria-labelledby="contact-tab">
-                            <div id="target_div_errors" style="overflow-y: scroll; height: 300px;">
-                                <div id="output-errors">
-                                </div>
-                            </div>
-                        </div>
-                        <div class="tab-pane fade" id="est" role="tabpanel" aria-labelledby="est-tab">
-                            <div id="target_div_est" style="overflow-y: scroll; height: 300px;">
-                                <div id="output-estimation">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-              </div>
-            
-        </div>
-
-        
-        <div class="container">
-            <div class="row">
-                <div class="col">
-
-                    <h1>Upload an OCpR Model</h1>
-                    <hr>
-
-                    <form id="calcForm" action="/upload-OCpR_file" method="POST" enctype="multipart/form-data">
-
-                        <div class="form-group">
-                            <label>Select OCpR_file</label>
-                            <div class="custom-file">
-                                <input type="file" class="custom-file-input" name="file" id="OCpR_file">
-                                <label class="custom-file-label" id="fileLabel" for="OCpR_file">Select image...</label>
-                            </div>
-                        </div>
-                        <button type="submit" class="btn btn-primary" id="uploadButn">Upload</button>
-                    </form>
-
-                </div>
-
             </div>
         </div>
         <br />
         <div class="container">
+            <canvas id="myChart" width="50" height="50"></canvas>
+        </div>
+    </div>
+    <div id="Competitor" class="col">
+        <div class="container">
             <div class="row">
                 <div class="col">
-
+                    <h1>Competitor Model</h1>
+                    <hr>
+                    <form id="calcForm" action="/upload-OCpR_file" method="POST" enctype="multipart/form-data">
+                        <div class="form-group">
+                            <label>Select OCpR_file</label>
+                            <div class="custom-file">
+                                <input type="file" class="custom-file-input" name="file" id="OCpR_file">
+                                <label class="custom-file-label" id="fileLabel" for="OCpR_file">Select file...</label>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary" id="uploadButn">Upload and Validate</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <br />
+        <div class="container">
+            <div class="alert alert-success" role="alert">
+                <h4 class="alert-heading">Well done!</h4>
+                <p>Aww yeah, you successfully read this important alert message. This example text is going to run a bit longer so that you can see how spacing within an alert works with this kind of content.</p>
+                <hr>
+                <p class="mb-0">Whenever you need to, be sure to use margin utilities to keep things nice and tidy.</p>
+            </div>
+            <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                <strong>Holy guacamole!</strong> You should check in on some of those fields below.
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="alert alert-danger" role="alert">
+                A simple danger alert with <a href="#" class="alert-link">an example link</a>. Give it a click if you like.
+            </div>
+    
+        </div>
+        <div class="container">
+            <div class="row">
+                <div class="col">
                     <h2>Uploaded Files</h2>
                     <hr>
-                    <form id="OCpR_Run_Form" action="/launchProcess_OCpR_file" method="GET">
+                    <form id="OCpR_Run_Form" action="/Checker_OCpR_file" method="GET">
                         <div class="form-group">
                             <label>Upload OCpR_file</label>
                             <div class="custom-file">
                                 <input type="text" class="custom-file-input" name="fileName" id="OCpR_file2">
                                 <label class="custom-file-label" id="loadedUpFile"></label>
                             </div>
-
                         </div>
                         <button type="submit" class="btn btn-primary" for="OCpR_file2" id="prcsCal">Calculate OCpR</button>
                     </form>
-
                 </div>
             </div>
         </div>
+        <br />
         <div class="container">
-            <canvas id="myChart" width="400" height="400"></canvas>
+            <canvas id="myChart2" width="50" height="50"></canvas>
         </div>
-
-    </main><!-- /.container -->
-    {% endblock %}
+    </div>
+    </div>
+</main>
+{% endblock %}
 
     {% block script1 %}
 
@@ -190,6 +157,12 @@
             $('#fileLabel').text(pathLoaded);
         });
 
+ 
+        $("#prcsCal").click(
+            function () {
+                $('#loadedUpFile').text("");
+            });
+
         $("#uploadButn").click(
             function () {
                 var _text = $('#fileLabel').text();
@@ -199,100 +172,104 @@
             });
 
 
-$("#OCpR_Run_Form").submit(function(event) {
-        event.stopPropagation();
-        event.preventDefault();
-        console.log($("#loadedUpFile").value)
-        $.ajax({
-        url: $(this).attr("action"),
-        data:  "fileName=" + $("#loadedUpFile").text() ,
-        processData: false,
-        contentType: false,
-        type: 'GET',
-        success: function(data) {
-            console.log('A message has arrived!');              
-            var obj3 = $.parseJSON(data);
-            console.log(obj3);
- 
-            $('#output-main').empty();
-            $('#output-warnings').empty();
-            $('#output-errors').empty();
-            $('#output-estimation').empty();
-
-            main_new_par = x => $('#output-main').append('<p>'+x+'</p>');
-            warn_new_par = x => $('#output-warnings').append('<p>'+x+'</p>');
-            err_new_par = x =>$('#output-errors').append('<p>'+x+'</p>');
-            
-            obj3.main.forEach(main_new_par);
-            obj3.warn.forEach(warn_new_par);
-            obj3.err.forEach(err_new_par);
-
-
-            $('#output-estimation').append('<p>'+obj3.est+'</p>');
-            $('#loadedUpFile').text(""); 
-            
-        }})});
-
+        $("#OCpR_Run_Form").submit(function (event) {
+            event.stopPropagation();
+            event.preventDefault();
+            console.log($("#loadedUpFile").value)
+            $.ajax({
+                url: $(this).attr("action"),
+                data: "fileName=" + $("#loadedUpFile").text(),
+                processData: false,
+                contentType: false,
+                type: 'GET',
+                success: function (data) {
+                    console.log('A message has arrived!');
+                    var obj3 = $.parseJSON(data);
+                    console.log(obj3);
+                }
+            })
+        });
     </script>
 
-<script language="javascript" type="text/javascript">
-    $("#OCpR_file").change(function () {
-        var pathLoaded = this.value.replace("C:\\fakepath\\", "");
-        $('#fileLabel').text(pathLoaded);
-    });
 
-    $("#uploadButn").click(
-        function () {
-            var _text = $('#fileLabel').text();
-            $('#loadedUpFile').text(_text);
-            $('#OCpR_file2').val(_text);
-            $('#fileLabel').text("Select image...");
-        });
-
-    $("#prcsCal").click(
-        function () {
-            $('#loadedUpFile').text("");
-        });
-</script>
-<script>
-var ctx = document.getElementById('myChart').getContext('2d');
-var myChart = new Chart(ctx, {
-    type: 'bar',
-    data: {
-        labels: ['Red', 'Blue', 'Yellow', 'Green', 'Purple', 'Orange'],
-        datasets: [{
-            label: '# of Votes',
-            data: [12, 19, 3, 5, 2, 3],
-            backgroundColor: [
-                'rgba(255, 99, 132, 0.2)',
-                'rgba(54, 162, 235, 0.2)',
-                'rgba(255, 206, 86, 0.2)',
-                'rgba(75, 192, 192, 0.2)',
-                'rgba(153, 102, 255, 0.2)',
-                'rgba(255, 159, 64, 0.2)'
-            ],
-            borderColor: [
-                'rgba(255, 99, 132, 1)',
-                'rgba(54, 162, 235, 1)',
-                'rgba(255, 206, 86, 1)',
-                'rgba(75, 192, 192, 1)',
-                'rgba(153, 102, 255, 1)',
-                'rgba(255, 159, 64, 1)'
-            ],
-            borderWidth: 1
-        }]
-    },
-    options: {
-        scales: {
-            yAxes: [{
-                ticks: {
-                    beginAtZero: true
+    <script>
+        var ctx = document.getElementById('myChart').getContext('2d');
+        var myChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['Red', 'Blue', 'Yellow', 'Green', 'Purple', 'Orange'],
+                datasets: [{
+                    label: '# of Votes',
+                    data: [12, 19, 3, 5, 2, 3],
+                    backgroundColor: [
+                        'rgba(255, 99, 132, 0.2)',
+                        'rgba(54, 162, 235, 0.2)',
+                        'rgba(255, 206, 86, 0.2)',
+                        'rgba(75, 192, 192, 0.2)',
+                        'rgba(153, 102, 255, 0.2)',
+                        'rgba(255, 159, 64, 0.2)'
+                    ],
+                    borderColor: [
+                        'rgba(255, 99, 132, 1)',
+                        'rgba(54, 162, 235, 1)',
+                        'rgba(255, 206, 86, 1)',
+                        'rgba(75, 192, 192, 1)',
+                        'rgba(153, 102, 255, 1)',
+                        'rgba(255, 159, 64, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    yAxes: [{
+                        ticks: {
+                            beginAtZero: true
+                        }
+                    }]
                 }
-            }]
-        }
-    }
-});
-</script>
+            }
+        });
+    </script>
+    <script>
+        var ctx = document.getElementById('myChart2').getContext('2d');
+        var myChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['Red', 'Blue', 'Yellow', 'Green', 'Purple', 'Orange'],
+                datasets: [{
+                    label: '# of Votes',
+                    data: [12, 19, 3, 5, 2, 3],
+                    backgroundColor: [
+                        'rgba(255, 99, 132, 0.2)',
+                        'rgba(54, 162, 235, 0.2)',
+                        'rgba(255, 206, 86, 0.2)',
+                        'rgba(75, 192, 192, 0.2)',
+                        'rgba(153, 102, 255, 0.2)',
+                        'rgba(255, 159, 64, 0.2)'
+                    ],
+                    borderColor: [
+                        'rgba(255, 99, 132, 1)',
+                        'rgba(54, 162, 235, 1)',
+                        'rgba(255, 206, 86, 1)',
+                        'rgba(75, 192, 192, 1)',
+                        'rgba(153, 102, 255, 1)',
+                        'rgba(255, 159, 64, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    yAxes: [{
+                        ticks: {
+                            beginAtZero: true
+                        }
+                    }]
+                }
+            }
+        });
+    </script>
 {% endblock %}
 
  
