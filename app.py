@@ -37,12 +37,12 @@ def hello():
     '''
     return render_template("index.html")
 
-@app.route('/cheker')  
+@app.route('/checker')  
 def cheker():
     ''''
     Route Function: main page
     '''
-    return render_template("file_checker.html")
+    return render_template("checker.html")
 
 
 @app.route("/upload-OCpR_file", methods=["GET", "POST"])
