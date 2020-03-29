@@ -6,12 +6,14 @@ import copy
 import pandas as pd
 import Conf_Calculator as CC
 import Conf_Checker as CE
+import json
+from flask import jsonify
 from flask import Flask
 from flask import render_template, send_from_directory,request, redirect
 app = Flask(__name__)
 
 app.config["OCpR_file_UPLOADS"] = ".\\uploads"
-app.config["ALLOWED_OCpR_file_EXTENSIONS"] = ["XLSX"]
+app.config["ALLOWED_OCpR_file_EXTENSIONS"] = ["XLSX", "XLS"]
 
 
 def allowed_image(filename):
@@ -45,25 +47,44 @@ def cheker():
     return render_template("checker.html")
 
 
+
+
 @app.route("/upload-OCpR_file", methods=["GET", "POST"])
 def upload_OCpR_file():
     '''
     Route Process Function: uploads the OCpR file
     '''
-
     if request.method == "POST":
-
+        print(request)
         if request.files:
 
             OCpR_file = request.files["file"]
-
-            if OCpR_file.filename == "":
-                return redirect("index")
-
+            print(OCpR_file.filename)
             if allowed_image(OCpR_file.filename):
-                OCpR_file.save(os.path.join(app.config["OCpR_file_UPLOADS"], OCpR_file.filename))
-    
+                file_target_save = os.path.join(app.config["OCpR_file_UPLOADS"], OCpR_file.filename)
+                OCpR_file.save(file_target_save)
+                print(file_target_save)
+                data = CE.comb_estimator(file_target_save)
+            return data
+
     return ('', 204)
+            
+@app.route("/Checker_OCpR_file", methods=["GET"])
+def Checker_OCpR():
+    '''
+    Route Process Function: start to process the OCpR
+    '''
+    data = None
+    if request.method == "GET":
+        # print("File to Elaborate:")
+        # print(request.query_string.replace('fileName=', ''))
+        print(request.args.get('fileName'))
+        data = CE.comb_estimator('.\\uploads\\' + request.args.get('fileName'))
+        
+
+    #return render_template("index.html")
+    return data
+   
 
 
 @app.route("/launchProcess_OCpR_file", methods=["GET"])
@@ -102,24 +123,21 @@ def launchProcess():
 
         final_df = pd.merge(OCpR_tags,Conf_List_prices, on='code', how='inner')
         final_df = pd.merge(final_df,Conf_Street_prices, on='code', how='inner')
-     
 
-    return final_df[['q_by_Lp','q_by_Sp']].to_json(orient='records')
+        lod = []
+        points = list(zip(final_df['q_by_Lp'].to_list(), final_df['q_by_Sp'].to_list()))
+        for elem in points:
+            lod.append({'x':elem[0], 'y':elem[1]})
 
-@app.route("/Checker_OCpR_file", methods=["GET"])
-def Checker_OCpR():
-    '''
-    Route Process Function: start to process the OCpR
-    '''
-    data = None
-    if request.method == "GET":
-        # print("File to Elaborate:")
-        # print(request.query_string.replace('fileName=', ''))
-        data = CE.comb_estimator('.\\uploads\\' + request.args.get('fileName'))
-        
+        resultForChartJS = {'datasets': [{
+            'label': 'Scatter Competition Points',
+            'data': lod
+            }]
+        }
 
-    #return render_template("index.html")
-    return data
+    return jsonify(resultForChartJS)
+
+
   
 
 if __name__ == '__main__':
