@@ -99,16 +99,9 @@ def competitveness():
 
 @app.route("/ListStreet", methods=["GET"])
 def ListStreet():
- 
-    return jsonify(CC.ThreatsOpportunitiesCal())
-
-
-@app.route("/launchProcess_OCpR_file", methods=["GET"])
-def launchProcess():
     '''
     Route Process Function: start to process the OCpR
     '''
-    
     if request.method == "GET":
         name_of_the_file = request.args.get('fileName')
         file_ = os.getcwd() + r"\uploads" + '\\' + name_of_the_file  

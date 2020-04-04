@@ -23,15 +23,24 @@ def filter_out_tags(df):
     return copy.copy(df[cols_non_desc])
 
 def keep_tags(df):
+    '''
+    Utility Function: 
+    '''
     sku_w_tags = lambda x: 'tag' in x
     cols_tags =  list(filter(sku_w_tags, df.columns.to_list()))
     return copy.copy(df[cols_tags])
 
 def column_renamer(df, sheet_name):
+    '''
+    Utility Function: 
+    '''
     df.columns = [ sheet_name+'_' + x if (('sku' in x) or ('qty' in x)) else x for x in  df.columns.to_list()]
     return df
 
 def dataframes_splitter(path_to_the_file = r'.\uploads\VxRail_E560N.xls', list_for_splits=['Street_Prices', 'List_Prices']):
+    '''
+    Utility Function: 
+    '''
     OCpR_dfs, Prices_dfs = [], []
     
     excel_ = pd.ExcelFile(path_to_the_file)
@@ -51,11 +60,17 @@ def dataframes_splitter(path_to_the_file = r'.\uploads\VxRail_E560N.xls', list_f
     return OCpR_dfs, Prices_dfs
 
 def common_tags(df_l, df_r):
+    '''
+    Utility Function: 
+    '''
     left_ = df_l.columns.to_list()
     rigth_ = df_r.columns.to_list()
     return list(set(left_).intersection(rigth_))
 
 def loop_thru_dataframes(df_list, howhow='inner'):
+    '''
+    Utility Function: 
+    '''
     ocpr_df = pd.DataFrame()
     counter =  1
     for d_ in df_list:
@@ -75,13 +90,18 @@ def loop_thru_dataframes(df_list, howhow='inner'):
 
 
 def order_columns(df):
+    '''
+    Utility Function: 
+    '''
     sku_and_qty = lambda x : ('sku' in x) or ('qty' in x)
     tag = lambda x : ('tag' in x) 
     cols_ = df.columns.to_list()
     return  pd.concat( [ df[list(filter(sku_and_qty, cols_))], df[list(filter(tag, cols_))] ], axis=1)
 
 def OCpR_stacker(df):
-    
+    '''
+    Utility Function: 
+    '''
     OCpR_stackable = filter_out_tags(df)
     OCpR_conf_tags = keep_tags(df)
     list_to_add_as_code =[x+1 for x in  OCpR_conf_tags.index.to_list().copy()]     
@@ -107,6 +127,9 @@ def OCpR_stacker(df):
     return pd.DataFrame(rows_to_stack, columns=['SKU', 'qty','code']), OCpR_conf_tags
 
 def AnalysisDF(path_to_the_file__ ):
+    '''
+    Process Function: 
+    '''
 
     dfs, details_dfs = dataframes_splitter(path_to_the_file = path_to_the_file__)
     OCpR = loop_thru_dataframes(dfs)
@@ -136,6 +159,9 @@ def AnalysisDF(path_to_the_file__ ):
 
 
 def ADOT_dfs(MyCompany=r'./uploads/MyCompany.xls', Competitor=r'./uploads/Competitor.xls'):
+    '''
+    Process Function: 
+    '''
 
     Competitor0 = AnalysisDF(MyCompany)
     Competitor1 = AnalysisDF(Competitor)
@@ -149,53 +175,58 @@ def ADOT_dfs(MyCompany=r'./uploads/MyCompany.xls', Competitor=r'./uploads/Compet
     return [Competitor0, Competitor1, Comp0, Comp1, Comp0_grouped, Comp1_grouped]
 
 def ListStreetCal(file_, D3_ChartJS = True):
-        dfs, details_dfs                    = dataframes_splitter(path_to_the_file=file_)
-        OCpR                                = loop_thru_dataframes(dfs)
-        OCpR_staked, OCpR_tags              = OCpR_stacker(OCpR)
-        details_dfs.insert(0,OCpR_staked)
-        df_ca                               = loop_thru_dataframes(details_dfs, howhow='left')
+    '''
+    Process Function: 
+    '''
+    dfs, details_dfs                    = dataframes_splitter(path_to_the_file=file_)
+    OCpR                                = loop_thru_dataframes(dfs)
+    OCpR_staked, OCpR_tags              = OCpR_stacker(OCpR)
+    details_dfs.insert(0,OCpR_staked)
+    df_ca                               = loop_thru_dataframes(details_dfs, howhow='left')
 
-        #ListPrices
-        df_ca['q_by_Lp'] = df_ca['List_Price'] * df_ca['qty']
-        df_ca = df_ca.fillna(0.0)
-        Conf_List_prices = df_ca[['code','q_by_Lp']].groupby('code').sum()
-        Conf_List_prices['code'] = Conf_List_prices.index
-        Conf_List_prices.index = Conf_List_prices.index.rename('index')
+    #ListPrices
+    df_ca['q_by_Lp'] = df_ca['List_Price'] * df_ca['qty']
+    df_ca = df_ca.fillna(0.0)
+    Conf_List_prices = df_ca[['code','q_by_Lp']].groupby('code').sum()
+    Conf_List_prices['code'] = Conf_List_prices.index
+    Conf_List_prices.index = Conf_List_prices.index.rename('index')
 
-        #StreetPrices
-        df_ca['q_by_Sp'] = df_ca['Street_Price'] * df_ca['qty']
-        df_ca = df_ca.fillna(0.0)
-        Conf_Street_prices = df_ca[['code','q_by_Sp']].groupby('code').sum()
-        Conf_Street_prices['code'] = Conf_List_prices.index
-        Conf_Street_prices.index = Conf_Street_prices.index.rename('index')
+    #StreetPrices
+    df_ca['q_by_Sp'] = df_ca['Street_Price'] * df_ca['qty']
+    df_ca = df_ca.fillna(0.0)
+    Conf_Street_prices = df_ca[['code','q_by_Sp']].groupby('code').sum()
+    Conf_Street_prices['code'] = Conf_List_prices.index
+    Conf_Street_prices.index = Conf_Street_prices.index.rename('index')
 
-        final_df = pd.merge(OCpR_tags,Conf_List_prices, on='code', how='inner')
-        final_df = pd.merge(final_df,Conf_Street_prices, on='code', how='inner')
+    final_df = pd.merge(OCpR_tags,Conf_List_prices, on='code', how='inner')
+    final_df = pd.merge(final_df,Conf_Street_prices, on='code', how='inner')
 
 
-        
-        #choose the format for the return
-        result_ = None
-        if D3_ChartJS:
-            result_ = final_df[['q_by_Lp', 'q_by_Sp']]
+    
+    #choose the format for the return
+    result_ = None
+    if D3_ChartJS:
+        result_ = final_df[['q_by_Lp', 'q_by_Sp']]
 
-        else:
-            lod = []
-            points = list(zip(final_df['q_by_Lp'].to_list(), final_df['q_by_Sp'].to_list()))
-            for elem in points:
-                lod.append({'x':elem[0], 'y':elem[1]})
+    else:
+        lod = []
+        points = list(zip(final_df['q_by_Lp'].to_list(), final_df['q_by_Sp'].to_list()))
+        for elem in points:
+            lod.append({'x':elem[0], 'y':elem[1]})
 
-            result_ = {'datasets': [{
-                'label': 'Scatter Competition Points',
-                'data': lod
-                }]
-            }
+        result_ = {'datasets': [{
+            'label': 'Scatter Competition Points',
+            'data': lod
+            }]
+        }
 
-        return result_
+    return result_
 
 
 def AdvantageDisadvantageCal(MyCompany=r'./uploads/MyCompany.xls', Competitor=r'./uploads/Competitor.xls'):
-
+    '''
+    Process Function: 
+    '''
     dfs_ = ADOT_dfs(MyCompany, Competitor)
 
     Competitor0, Competitor1, Comp0, Comp1, Comp0_grouped, Comp1_grouped  = dfs_[0], dfs_[1], dfs_[2], dfs_[3], dfs_[4], dfs_[5]
@@ -220,7 +251,9 @@ def AdvantageDisadvantageCal(MyCompany=r'./uploads/MyCompany.xls', Competitor=r'
 
 
 def ThreatsOpportunitiesCal(MyCompany=r'./uploads/MyCompany.xls', Competitor=r'./uploads/Competitor.xls'):
-
+    '''
+    Process Function: 
+    '''
     dfs_ = ADOT_dfs(MyCompany, Competitor)
 
     Competitor0, Competitor1, Comp0, Comp1, Comp0_grouped, Comp1_grouped  = dfs_[0], dfs_[1], dfs_[2], dfs_[3], dfs_[4], dfs_[5]
