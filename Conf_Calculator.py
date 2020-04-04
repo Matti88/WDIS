@@ -104,3 +104,31 @@ def OCpR_stacker(df):
 
             col_ +=1
     return pd.DataFrame(rows_to_stack, columns=['SKU', 'qty','code']), OCpR_conf_tags
+
+def AnalysisDF(path_to_the_file__ ):
+
+    dfs, details_dfs = dataframes_splitter(path_to_the_file = path_to_the_file__)
+    OCpR = loop_thru_dataframes(dfs)
+    OCpR_staked, OCpR_tags = OCpR_stacker(OCpR)
+    details_dfs.insert(0,OCpR_staked)
+    df_ca = loop_thru_dataframes(details_dfs, howhow='left')
+
+    #ListPrices
+    df_ca['q_by_Lp'] = df_ca['List_Price'] * df_ca['qty']
+    df_ca = df_ca.fillna(0.0)
+    Conf_List_prices = df_ca[['code','q_by_Lp']].groupby('code').sum()
+    Conf_List_prices['code'] = Conf_List_prices.index
+    Conf_List_prices.index = Conf_List_prices.index.rename('index')
+
+    #StreetPrices
+    df_ca['q_by_Sp'] = df_ca['Street_Price'] * df_ca['qty']
+    df_ca = df_ca.fillna(0.0)
+    Conf_Street_prices = df_ca[['code','q_by_Sp']].groupby('code').sum()
+    Conf_Street_prices['code'] = Conf_List_prices.index
+    Conf_Street_prices.index = Conf_Street_prices.index.rename('index')
+
+    final_df = pd.merge(OCpR_tags,Conf_List_prices, on='code', how='inner')
+
+    final_df = pd.merge(final_df,Conf_Street_prices, on='code', how='inner')
+    
+    return final_df
