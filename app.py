@@ -85,6 +85,72 @@ def Checker_OCpR():
     #return render_template("index.html")
     return data
    
+@app.route("/advantages", methods=["GET"])
+def advantages():
+    Competitor0 = CC.AnalysisDF(r'C:/Users/zuzan/Desktop/MyCompany.xls')
+    Competitor1 = CC.AnalysisDF(r'C:/Users/zuzan/Desktop/Competitor.xls')
+
+    Comp0 = pd.concat([Competitor0[list(filter(lambda x: 'tag' in x,  Competitor0.columns))], Competitor0[['q_by_Lp','q_by_Sp']] ] , axis=1)
+    Comp1 = pd.concat([Competitor1[list(filter(lambda x: 'tag' in x,  Competitor1.columns))], Competitor1[['q_by_Lp','q_by_Sp']] ] , axis=1)
+
+    Comp0_grouped = Comp0.groupby(list(filter(lambda x: 'tag' in x,  Comp0.columns))).mean().reset_index() 
+    Comp1_grouped = Comp1.groupby(list(filter(lambda x: 'tag' in x,  Comp1.columns))).mean().reset_index() 
+
+
+    cmmn_tags_list = list(filter(lambda x: not(('q_by_Lp' in x) or ('q_by_Sp' in x)) , CC.common_tags(Comp0_grouped, Comp1_grouped)))
+
+    ocpr_df = pd.merge(Comp0_grouped, Comp1_grouped, on=cmmn_tags_list ,how='inner', suffixes=('_0', '_1'))     
+
+    MyCompany_LP_Advantage = ocpr_df[ocpr_df['q_by_Lp_0'] < ocpr_df['q_by_Lp_1']].to_json(orient="records")
+    MyCompany_SP_Advantage = ocpr_df[ocpr_df['q_by_Sp_0'] < ocpr_df['q_by_Sp_1']].to_json(orient="records")
+    Competitor_SP_Advantage = ocpr_df[ocpr_df['q_by_Sp_0'] > ocpr_df['q_by_Sp_1']].to_json(orient="records")
+    Competitor_LP_Advantage = ocpr_df[ocpr_df['q_by_Lp_0'] > ocpr_df['q_by_Lp_1']].to_json(orient="records")
+
+    competition_Vantages = "{" + f""" "MyCompany_LP_Advantage" : {MyCompany_LP_Advantage}
+                                    , "MyCompany_SP_Advantage" : {MyCompany_SP_Advantage} 
+                                    , "Competitor_SP_Advantage" : {Competitor_SP_Advantage} 
+                                    , "Competitor_LP_Advantage" : {Competitor_LP_Advantage} """ + "}"
+
+    file_like_object = json.loads(competition_Vantages)
+
+    return jsonify(file_like_object)
+
+
+@app.route("/competitveness", methods=["GET"])
+def competitveness():
+    Competitor0 = CC.AnalysisDF(r'C:/Users/zuzan/Desktop/MyCompany.xls')
+    Competitor1 = CC.AnalysisDF(r'C:/Users/zuzan/Desktop/Competitor.xls')
+
+    Comp0 = pd.concat([Competitor0[list(filter(lambda x: 'tag' in x,  Competitor0.columns))], Competitor0[['q_by_Lp','q_by_Sp']] ] , axis=1)
+    Comp1 = pd.concat([Competitor1[list(filter(lambda x: 'tag' in x,  Competitor1.columns))], Competitor1[['q_by_Lp','q_by_Sp']] ] , axis=1)
+
+    Comp0_grouped = Comp0.groupby(list(filter(lambda x: 'tag' in x,  Comp0.columns))).mean().reset_index() 
+    Comp1_grouped = Comp1.groupby(list(filter(lambda x: 'tag' in x,  Comp1.columns))).mean().reset_index() 
+
+    TO_dict = {'Threats' : [Competitor1, Comp0_grouped], 'Opportunities':[Competitor0, Comp1_grouped]}
+    Threats_and_Opportunities = {}
+    for key_ in TO_dict.keys():
+        
+        _comparison_items =  TO_dict[key_]
+        comp_0, comp_1 = _comparison_items[0], _comparison_items[1]
+
+        competition = pd.merge(
+                        comp_0,
+                        comp_1,
+                    on= list(filter(lambda x: 'tag' in x,  CC.common_tags(Competitor0,Comp1_grouped))),
+                    how='inner', 
+                    suffixes=('_AdvSrch', '_CompAdv'))  
+
+        criteria_advantage_LP = competition['q_by_Lp_AdvSrch'] < competition['q_by_Lp_CompAdv']
+        criteria_advantage_SP = competition['q_by_Sp_AdvSrch'] < competition['q_by_Sp_CompAdv']
+        
+        Advantage_LP = (json.loads(competition[criteria_advantage_LP].to_json(orient="records")))
+        Advantage_SP = (json.loads(competition[criteria_advantage_SP].to_json(orient="records")))
+
+        Threats_and_Opportunities[key_] = [{'ListPrices':Advantage_LP},{'StreetPrices':Advantage_SP}]
+
+
+    return jsonify(Threats_and_Opportunities)
 
 
 @app.route("/launchProcess_OCpR_file", methods=["GET"])
