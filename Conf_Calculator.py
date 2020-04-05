@@ -3,6 +3,7 @@ import numpy as np
 import copy 
 import json
 
+
 #FUNCTIONS
 def filter_out_descriptions_and_non_tags(df):
     '''
@@ -283,3 +284,48 @@ def ThreatsOpportunitiesCal(MyCompany=r'./uploads/MyCompany.xls', Competitor=r'.
         Threats_and_Opportunities[key_] = [{'ListPrices':Advantage_LP},{'StreetPrices':Advantage_SP}]
 
     return Threats_and_Opportunities
+
+
+def secretFormulaGeneratingSeuquencesSalesData(list_of_conf_code):
+    '''
+    Utility Function: for generating sequence of Sales Data
+    '''
+    import random
+
+    weight_for_confs = []
+    months = [1,2,3,4,5]
+    percentages = [0.3,0.2, 0.25]
+    month_outcome = {}
+
+    for conf_ in list_of_conf_code:
+        weight_for_confs.append(random.betavariate(1.3,5))
+
+    norm = [float(i)/sum(weight_for_confs) for i in weight_for_confs]
+    prob_conf = sorted(list(zip(norm, list_of_conf_code)), key=lambda x: x[0], reverse=True)
+
+    for month_ in months:
+        selected_items = []
+        rangeSelected = prob_conf[0:random.randint(100,120)]
+        for i in range(int(round(len(rangeSelected) * random.choice(percentages),0))):
+            selected_items.append(random.choice(rangeSelected))
+        month_outcome[month_] = selected_items
+
+    return month_outcome
+
+def secretFormula_salesData(dict_month_sales, order_data_extract):
+    '''
+    Utility Function: Generates Sales Data with 
+    '''
+    dataSales = None
+    for month_ in dict_month_sales.keys():
+        ord_seq = 1
+        for item in dict_month_sales[month_]:
+            singleOrder = order_data_extract[order_data_extract['code'] == item[1]].copy()
+            singleOrder['Month']  = month_
+            singleOrder['OrdSeq'] = ord_seq
+            ord_seq += 1
+            if dataSales is None:
+                dataSales = singleOrder
+            else:
+                dataSales = pd.concat([dataSales , singleOrder])
+    return dataSales
