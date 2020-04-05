@@ -130,7 +130,7 @@ def AnalysisDF(path_to_the_file__ ):
     '''
     Process Function: 
     '''
-
+    #Generating Basic df
     dfs, details_dfs = dataframes_splitter(path_to_the_file = path_to_the_file__)
     OCpR = loop_thru_dataframes(dfs)
     OCpR_staked, OCpR_tags = OCpR_stacker(OCpR)
@@ -151,8 +151,8 @@ def AnalysisDF(path_to_the_file__ ):
     Conf_Street_prices['code'] = Conf_List_prices.index
     Conf_Street_prices.index = Conf_Street_prices.index.rename('index')
 
+    #adding to the OCpR basic the List and Street Prices
     final_df = pd.merge(OCpR_tags,Conf_List_prices, on='code', how='inner')
-
     final_df = pd.merge(final_df,Conf_Street_prices, on='code', how='inner')
     
     return final_df
@@ -162,13 +162,15 @@ def ADOT_dfs(MyCompany=r'./uploads/MyCompany.xls', Competitor=r'./uploads/Compet
     '''
     Process Function: 
     '''
-
+    #basic DataFrames
     Competitor0 = AnalysisDF(MyCompany)
     Competitor1 = AnalysisDF(Competitor)
 
+    #clearing out the configuration code in a very complicated way
     Comp0 = pd.concat([Competitor0[list(filter(lambda x: 'tag' in x,  Competitor0.columns))], Competitor0[['q_by_Lp','q_by_Sp']] ] , axis=1)
     Comp1 = pd.concat([Competitor1[list(filter(lambda x: 'tag' in x,  Competitor1.columns))], Competitor1[['q_by_Lp','q_by_Sp']] ] , axis=1)
 
+    #summarying all the combinations of tags against the average prices related to those 
     Comp0_grouped = Comp0.groupby(list(filter(lambda x: 'tag' in x,  Comp0.columns))).mean().reset_index() 
     Comp1_grouped = Comp1.groupby(list(filter(lambda x: 'tag' in x,  Comp1.columns))).mean().reset_index() 
 
@@ -176,7 +178,7 @@ def ADOT_dfs(MyCompany=r'./uploads/MyCompany.xls', Competitor=r'./uploads/Compet
 
 def ListStreetCal(file_, D3_ChartJS = True):
     '''
-    Process Function: 
+    Process Function: Calculating the List vs Street Data
     '''
     dfs, details_dfs                    = dataframes_splitter(path_to_the_file=file_)
     OCpR                                = loop_thru_dataframes(dfs)
@@ -198,10 +200,9 @@ def ListStreetCal(file_, D3_ChartJS = True):
     Conf_Street_prices['code'] = Conf_List_prices.index
     Conf_Street_prices.index = Conf_Street_prices.index.rename('index')
 
+    #creating a data List and Street
     final_df = pd.merge(OCpR_tags,Conf_List_prices, on='code', how='inner')
     final_df = pd.merge(final_df,Conf_Street_prices, on='code', how='inner')
-
-
     
     #choose the format for the return
     result_ = None
@@ -225,18 +226,19 @@ def ListStreetCal(file_, D3_ChartJS = True):
 
 def AdvantageDisadvantageCal(MyCompany=r'./uploads/MyCompany.xls', Competitor=r'./uploads/Competitor.xls'):
     '''
-    Process Function: 
+    Process Function: Calculating all the situation onto which MyCompany has an advantage or disadvantage against Competitor
     '''
+    #generating all dataFrames
     dfs_ = ADOT_dfs(MyCompany, Competitor)
-
     Competitor0, Competitor1, Comp0, Comp1, Comp0_grouped, Comp1_grouped  = dfs_[0], dfs_[1], dfs_[2], dfs_[3], dfs_[4], dfs_[5]
   
+    #selecting the columns 
     cmmn_tags_list = list(filter(lambda x: not(('q_by_Lp' in x) or ('q_by_Sp' in x)) , common_tags(Comp0_grouped, Comp1_grouped)))
-
     ocpr_df = pd.merge(Comp0_grouped, Comp1_grouped, on=cmmn_tags_list ,how='inner', suffixes=('_0', '_1'))     
 
-    MyCompany_LP_Advantage = ocpr_df[ocpr_df['q_by_Lp_0'] < ocpr_df['q_by_Lp_1']].to_json(orient="records")
-    MyCompany_SP_Advantage = ocpr_df[ocpr_df['q_by_Sp_0'] < ocpr_df['q_by_Sp_1']].to_json(orient="records")
+    #criteria for selections
+    MyCompany_LP_Advantage  = ocpr_df[ocpr_df['q_by_Lp_0'] < ocpr_df['q_by_Lp_1']].to_json(orient="records")
+    MyCompany_SP_Advantage  = ocpr_df[ocpr_df['q_by_Sp_0'] < ocpr_df['q_by_Sp_1']].to_json(orient="records")
     Competitor_SP_Advantage = ocpr_df[ocpr_df['q_by_Sp_0'] > ocpr_df['q_by_Sp_1']].to_json(orient="records")
     Competitor_LP_Advantage = ocpr_df[ocpr_df['q_by_Lp_0'] > ocpr_df['q_by_Lp_1']].to_json(orient="records")
 
@@ -252,7 +254,7 @@ def AdvantageDisadvantageCal(MyCompany=r'./uploads/MyCompany.xls', Competitor=r'
 
 def ThreatsOpportunitiesCal(MyCompany=r'./uploads/MyCompany.xls', Competitor=r'./uploads/Competitor.xls'):
     '''
-    Process Function: 
+    Process Function: Calculating all the situation onto which MyCompany has an Threaths or Opportunity against Competitor
     '''
     dfs_ = ADOT_dfs(MyCompany, Competitor)
 
