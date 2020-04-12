@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 import copy 
 import json
-
+import string_sum as sr #TODO: Name to change ASAP
 
 #FUNCTIONS
 def filter_out_descriptions_and_non_tags(df):
@@ -84,6 +84,7 @@ def loop_thru_dataframes(df_list, howhow='inner'):
             counter += 1
         else:
             cmmn_tags_list = common_tags(ocpr_df, d_)
+            print('')
             if len(cmmn_tags_list) == 0:
                 ocpr_df['comKey'] = 1
                 d_['comKey'] = 1
@@ -130,6 +131,94 @@ def OCpR_stacker(df):
 
             col_ +=1
     return pd.DataFrame(rows_to_stack, columns=['SKU', 'qty','code']), OCpR_conf_tags
+
+def ConfigurationBoundleString(list_of_items):
+    '''
+    Utility Function: 
+    '''
+    exit_string = ''
+    for elem_pos in range(len(list_of_items)):
+        if (elem_pos + 1)%2 == 0:
+            exit_string = exit_string + '~' + str(list_of_items[elem_pos])
+        else:
+            exit_string = exit_string + ',' + str(list_of_items[elem_pos])
+    
+    return exit_string[1:]
+
+def getOrderDat_returnBoundleToOrder(dataFrameOfOrders):
+    '''
+    Utility Function: 
+    '''
+    string_out = ''
+    list_storing_strings = []
+    months = []
+    seq_numbers = []
+    month = None
+    OrderSeq = None
+    for  index, row in dataFrameOfOrders.iterrows():
+
+        #first line
+        if (month is None) and (OrderSeq is None):
+            string_out = row['SKU'] + '~' + str(row['qty'])
+            month, OrderSeq = row['Month'], row['OrdSeq']
+
+        elif (month != row['Month']) or( OrderSeq != row['OrdSeq']):
+            list_storing_strings.append(string_out)
+            months.append(month)
+            seq_numbers.append(OrderSeq)
+            
+            string_out = row['SKU'] + '~' + str(row['qty'])
+            month, OrderSeq = row['Month'], row['OrdSeq'] 
+        else:
+            string_out = string_out + str(row['SKU']) + '~' + str(row['qty']) + ',' 
+
+    d = {'boundles': list_storing_strings, 'month': months, 'seqNumb':seq_numbers }
+    boundlesToMonthSquenceOrders = pd.DataFrame(data=d)     
+    return boundlesToMonthSquenceOrders
+
+def secretFormulaGeneratingSeuquencesSalesData(list_of_conf_code):
+    '''
+    Utility Function: for generating sequence of Sales Data
+    '''
+    import random
+
+    weight_for_confs = []
+    months = [1,2,3,4,5]
+    percentages = [0.3,0.2, 0.25]
+    month_outcome = {}
+
+    for conf_ in list_of_conf_code:
+        weight_for_confs.append(random.betavariate(1.3,5))
+
+    norm = [float(i)/sum(weight_for_confs) for i in weight_for_confs]
+    prob_conf = sorted(list(zip(norm, list_of_conf_code)), key=lambda x: x[0], reverse=True)
+
+    for month_ in months:
+        selected_items = []
+        rangeSelected = prob_conf[0:random.randint(100,120)]
+        for i in range(int(round(len(rangeSelected) * random.choice(percentages),0))):
+            selected_items.append(random.choice(rangeSelected))
+        month_outcome[month_] = selected_items
+
+    return month_outcome
+
+def secretFormula_salesData(dict_month_sales, order_data_extract):
+    '''
+    Utility Function: Generates Sales Data with 
+    '''
+    dataSales = None
+    for month_ in dict_month_sales.keys():
+        ord_seq = 1
+        for item in dict_month_sales[month_]:
+            singleOrder = order_data_extract[order_data_extract['code'] == item[1]].copy()
+            singleOrder['Month']  = month_
+            singleOrder['OrdSeq'] = ord_seq
+            ord_seq += 1
+            if dataSales is None:
+                dataSales = singleOrder
+            else:
+                dataSales = pd.concat([dataSales , singleOrder])
+    return dataSales
 
 def AnalysisDF(path_to_the_file__ ):
     '''
@@ -290,46 +379,55 @@ def ThreatsOpportunitiesCal(MyCompany=r'./uploads/MyCompany.xls', Competitor=r'.
     return Threats_and_Opportunities
 
 
-def secretFormulaGeneratingSeuquencesSalesData(list_of_conf_code):
+def sales_analysis_gen_matcher(path_to_the_file = r'./uploads/MyCompany.xls', prices_tables=['Street_Prices', 'List_Prices'], order_tables = ['OrderData']):
     '''
-    Utility Function: for generating sequence of Sales Data
+    Process Function: matches all the order data to a single product and it assigns to the order also its price and tags
     '''
-    import random
+    OCpR, Prices, Orders = dataframes_splitter(path_to_the_file = r'./uploads/MyCompany.xls', prices_tables=['Street_Prices', 'List_Prices'], order_tables = ['OrderData'])
+    finalizedModel = loop_thru_dataframes(OCpR)
+    finalizedModel = finalizedModel[ list(filter( lambda x : 'tag' not in x,  finalizedModel.columns)) ]
+    config_boundles = pd.DataFrame()
+    config_boundles['code'] = finalizedModel.index
+    config_boundles['concat'] = pd.Series(finalizedModel.fillna('').values.tolist()).map(lambda x: ConfigurationBoundleString(x))
+    dataFrameOfOrders = Orders[0]
+    boundlesToMonthSquenceOrders = getOrderDat_returnBoundleToOrder(dataFrameOfOrders)
+    conf_list_of_boundles_data = list(map(list,zip(config_boundles['concat'], config_boundles['code'].astype(str))))
+    boundlesToMonthSquenceOrders_data = list(map(list,zip(  boundlesToMonthSquenceOrders['boundles'], boundlesToMonthSquenceOrders['month'].astype(str)+ "_" + boundlesToMonthSquenceOrders['seqNumb'].astype(str)  )))
+    b = sr.loop_two_lists_rayon_codes(conf_list_of_boundles_data , boundlesToMonthSquenceOrders_data, 0.8) #TODO: decide how to use this value 
+    fictionary_matching_results = {}
+    for i in b:
+        if i.orderseq in fictionary_matching_results.keys():
+            if (i.score > fictionary_matching_results[i.orderseq][1]):
+                fictionary_matching_results[i.orderseq] =  [i.boundle_code, i.score]
+        else:
+            fictionary_matching_results[i.orderseq] =  [i.boundle_code, i.score]
 
-    weight_for_confs = []
-    months = [1,2,3,4,5]
-    percentages = [0.3,0.2, 0.25]
-    month_outcome = {}
+    month = []
+    seq   = []
+    match = []
+    for match_ in fictionary_matching_results.keys():
+        l_identity_order = match_.split('_') 
+        month.append(int(l_identity_order[0]))
+        seq.append(int(l_identity_order[1]))
+        match.append(fictionary_matching_results[match_][0])
+    d = {'Month': month, 'OrdSeq': seq, 'match': match}
+    matched_df = pd.DataFrame(data=d)
 
-    for conf_ in list_of_conf_code:
-        weight_for_confs.append(random.betavariate(1.3,5))
+    dataFrameOfOrders['unit_Price_QTY'] = dataFrameOfOrders['unit_Price'] * dataFrameOfOrders['qty']
 
-    norm = [float(i)/sum(weight_for_confs) for i in weight_for_confs]
-    prob_conf = sorted(list(zip(norm, list_of_conf_code)), key=lambda x: x[0], reverse=True)
+    orders_totals = dataFrameOfOrders[['Month', 'OrdSeq', 'unit_Price_QTY']].groupby(['Month', 'OrdSeq']).sum().reset_index()
 
-    for month_ in months:
-        selected_items = []
-        rangeSelected = prob_conf[0:random.randint(100,120)]
-        for i in range(int(round(len(rangeSelected) * random.choice(percentages),0))):
-            selected_items.append(random.choice(rangeSelected))
-        month_outcome[month_] = selected_items
+    orders_match_prices = pd.merge( matched_df, orders_totals, on=['Month', 'OrdSeq'],how='inner')
+    orders_match_prices.rename(columns={'match':'code'}, inplace=True)
+    orders_match_prices['code'] = orders_match_prices['code'].astype(int)
 
-    return month_outcome
 
-def secretFormula_salesData(dict_month_sales, order_data_extract):
-    '''
-    Utility Function: Generates Sales Data with 
-    '''
-    dataSales = None
-    for month_ in dict_month_sales.keys():
-        ord_seq = 1
-        for item in dict_month_sales[month_]:
-            singleOrder = order_data_extract[order_data_extract['code'] == item[1]].copy()
-            singleOrder['Month']  = month_
-            singleOrder['OrdSeq'] = ord_seq
-            ord_seq += 1
-            if dataSales is None:
-                dataSales = singleOrder
-            else:
-                dataSales = pd.concat([dataSales , singleOrder])
-    return dataSales
+    OCpR, Prices, Orders = dataframes_splitter()
+    Model_Tags = loop_thru_dataframes(OCpR)
+    Model_Tags = Model_Tags[ list(filter( lambda x : 'tag' in x,  Model_Tags.columns))  ]
+    Model_Tags['code'] = Model_Tags.index
+    Model_Tags['code'] = Model_Tags['code'].astype(int)
+
+    analyzed_orders = pd.merge(orders_match_prices, Model_Tags, on=['code'])
+
+    return json.loads(analyzed_orders.to_json(orient="records") )

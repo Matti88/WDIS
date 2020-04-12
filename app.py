@@ -76,9 +76,6 @@ def Checker_OCpR():
     '''
     data = None
     if request.method == "GET":
-        # print("File to Elaborate:")
-        # print(request.query_string.replace('fileName=', ''))
-        print(request.args.get('fileName'))
         data = CChe.comb_estimator('.\\uploads\\' + request.args.get('fileName'))
         
 
@@ -94,8 +91,6 @@ def advantages():
 @app.route("/competitveness", methods=["GET"])
 def competitveness():
 
-    print("Working?")
- 
     return jsonify(CC.ThreatsOpportunitiesCal())
 
 
@@ -106,13 +101,18 @@ def ListStreet():
     '''
     if request.method == "GET":
         name_of_the_file = request.args.get('fileName')
-        file_ = os.getcwd() + r"\uploads" + '\\' + name_of_the_file  
+        file_ = os.getcwd() + r"\uploads" + '\\' + name_of_the_file 
         resultForChartJS = CC.ListStreetCal(file_, D3_ChartJS = False)
  
     return jsonify(resultForChartJS)
 
+@app.route("/sales_analysis", methods=["GET"])
+def sales_analysis():
+    '''
+    Route Process Function: sales analysis 
+    '''
+    return jsonify( CC.sales_analysis_gen_matcher() )
 
-  
 
 if __name__ == '__main__':
     app.run()
