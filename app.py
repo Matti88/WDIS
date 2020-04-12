@@ -5,7 +5,7 @@ import mimetypes
 import copy
 import pandas as pd
 import Conf_Calculator as CC
-import Conf_Checker as CE
+import Conf_Checker as CChe
 import json
 from flask import jsonify
 from flask import Flask
@@ -64,7 +64,7 @@ def upload_OCpR_file():
                 file_target_save = os.path.join(app.config["OCpR_file_UPLOADS"], OCpR_file.filename)
                 OCpR_file.save(file_target_save)
                 print(file_target_save)
-                data = CE.comb_estimator(file_target_save)
+                data = CChe.comb_estimator(file_target_save)
             return data
 
     return ('', 204)
@@ -79,7 +79,7 @@ def Checker_OCpR():
         # print("File to Elaborate:")
         # print(request.query_string.replace('fileName=', ''))
         print(request.args.get('fileName'))
-        data = CE.comb_estimator('.\\uploads\\' + request.args.get('fileName'))
+        data = CChe.comb_estimator('.\\uploads\\' + request.args.get('fileName'))
         
 
     #return render_template("index.html")
@@ -93,6 +93,8 @@ def advantages():
 
 @app.route("/competitveness", methods=["GET"])
 def competitveness():
+
+    print("Working?")
  
     return jsonify(CC.ThreatsOpportunitiesCal())
 

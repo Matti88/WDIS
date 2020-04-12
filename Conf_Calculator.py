@@ -7,7 +7,7 @@ import json
 #FUNCTIONS
 def filter_out_descriptions_and_non_tags(df):
     '''
-    Utility Function: 
+    Utility Function:  
     '''
     sku_desc_filter_out = lambda x: 'sku_desc' not in x
     sku_qty_tag = lambda x: not( ('sku' not in x) and ('qty' not in x) and ('tag' not in x))
@@ -38,27 +38,31 @@ def column_renamer(df, sheet_name):
     df.columns = [ sheet_name+'_' + x if (('sku' in x) or ('qty' in x)) else x for x in  df.columns.to_list()]
     return df
 
-def dataframes_splitter(path_to_the_file = r'.\uploads\VxRail_E560N.xls', list_for_splits=['Street_Prices', 'List_Prices']):
+def dataframes_splitter(path_to_the_file = r'./uploads/MyCompany.xls', prices_tables=['Street_Prices', 'List_Prices'], order_tables = ['OrderData']):
     '''
     Utility Function: 
     '''
-    OCpR_dfs, Prices_dfs = [], []
+    OCpR_dfs, Prices_dfs,  Orders_dfs = [], [], []
     
     excel_ = pd.ExcelFile(path_to_the_file)
 
     worksheets_names = excel_.sheet_names
     for ws_ in worksheets_names:
 
-        if (ws_ in list_for_splits) or ('Prices_' in ws_) :
+        if (ws_ in prices_tables) or ('Prices_' in ws_) :
             some_details = pd.read_excel(excel_, sheet_name=ws_)
             some_details.title = ws_
             Prices_dfs.append(some_details )
+        elif (ws_ in order_tables) or ('Order' in ws_) :
+
+            Order_tables = pd.read_excel(excel_, sheet_name=ws_)
+            Order_tables.title = ws_
+            Orders_dfs.append(Order_tables)
         else:
             df_comb = filter_out_descriptions_and_non_tags(pd.read_excel(excel_, sheet_name=ws_))
             
             OCpR_dfs.append(column_renamer(df_comb, ws_))
-    
-    return OCpR_dfs, Prices_dfs
+    return OCpR_dfs, Prices_dfs, Orders_dfs
 
 def common_tags(df_l, df_r):
     '''
@@ -132,7 +136,7 @@ def AnalysisDF(path_to_the_file__ ):
     Process Function: 
     '''
     #Generating Basic df
-    dfs, details_dfs = dataframes_splitter(path_to_the_file = path_to_the_file__)
+    dfs, details_dfs, orders_dfs = dataframes_splitter(path_to_the_file = path_to_the_file__)
     OCpR = loop_thru_dataframes(dfs)
     OCpR_staked, OCpR_tags = OCpR_stacker(OCpR)
     details_dfs.insert(0,OCpR_staked)
@@ -181,7 +185,7 @@ def ListStreetCal(file_, D3_ChartJS = True):
     '''
     Process Function: Calculating the List vs Street Data
     '''
-    dfs, details_dfs                    = dataframes_splitter(path_to_the_file=file_)
+    dfs, details_dfs , orders_dfs       = dataframes_splitter(path_to_the_file=file_)
     OCpR                                = loop_thru_dataframes(dfs)
     OCpR_staked, OCpR_tags              = OCpR_stacker(OCpR)
     details_dfs.insert(0,OCpR_staked)

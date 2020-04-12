@@ -4,3 +4,9 @@
 *.xls
 *.xlsx
 *.pyc
+zzz.py
+.TODO
+*.d
+*.cargo-lock
+/hammingDistance/target
+/hammingDistance/Cargo.lock

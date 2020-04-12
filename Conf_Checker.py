@@ -15,6 +15,10 @@ def comb_estimator(filename):
 
     sheets = pd.ExcelFile(filename)
     dataFrames_List = sheets.sheet_names
+
+    #filtering out order data tables
+    dataFrames_List = list(filter(lambda x: 'Order' not in x ,  dataFrames_List) )
+   
     sheets.close()
     estimate = 1
     tagged_dataframes = []
