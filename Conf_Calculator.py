@@ -84,7 +84,6 @@ def loop_thru_dataframes(df_list, howhow='inner'):
             counter += 1
         else:
             cmmn_tags_list = common_tags(ocpr_df, d_)
-            print('')
             if len(cmmn_tags_list) == 0:
                 ocpr_df['comKey'] = 1
                 d_['comKey'] = 1
@@ -93,7 +92,6 @@ def loop_thru_dataframes(df_list, howhow='inner'):
             else:
                 ocpr_df = pd.merge( ocpr_df, d_, on=cmmn_tags_list ,how=howhow)    
     return ocpr_df
-
 
 def order_columns(df):
     '''
@@ -251,7 +249,6 @@ def AnalysisDF(path_to_the_file__ ):
     
     return final_df
 
-
 def ADOT_dfs(MyCompany=r'./uploads/MyCompany.xls', Competitor=r'./uploads/Competitor.xls'):
     '''
     Process Function: 
@@ -317,7 +314,6 @@ def ListStreetCal(file_, D3_ChartJS = True):
 
     return result_
 
-
 def AdvantageDisadvantageCal(MyCompany=r'./uploads/MyCompany.xls', Competitor=r'./uploads/Competitor.xls'):
     '''
     Process Function: Calculating all the situation onto which MyCompany has an advantage or disadvantage against Competitor
@@ -344,7 +340,6 @@ def AdvantageDisadvantageCal(MyCompany=r'./uploads/MyCompany.xls', Competitor=r'
     file_like_object = json.loads(competition_Vantages)
 
     return file_like_object
-
 
 def ThreatsOpportunitiesCal(MyCompany=r'./uploads/MyCompany.xls', Competitor=r'./uploads/Competitor.xls'):
     '''
@@ -377,7 +372,6 @@ def ThreatsOpportunitiesCal(MyCompany=r'./uploads/MyCompany.xls', Competitor=r'.
         Threats_and_Opportunities[key_] = [{'ListPrices':Advantage_LP},{'StreetPrices':Advantage_SP}]
 
     return Threats_and_Opportunities
-
 
 def sales_analysis_gen_matcher(path_to_the_file = r'./uploads/MyCompany.xls', prices_tables=['Street_Prices', 'List_Prices'], order_tables = ['OrderData']):
     '''
@@ -429,5 +423,13 @@ def sales_analysis_gen_matcher(path_to_the_file = r'./uploads/MyCompany.xls', pr
     Model_Tags['code'] = Model_Tags['code'].astype(int)
 
     analyzed_orders = pd.merge(orders_match_prices, Model_Tags, on=['code'])
+    data =  {'data' : json.loads(analyzed_orders.to_json(orient="records") )}
+    return data
 
-    return json.loads(analyzed_orders.to_json(orient="records") )
+def threats_opportunities(path_to_the_file = r'./uploads/MyCompany.xls', prices_tables=['Street_Prices', 'List_Prices'], order_tables = ['OrderData']):
+    '''
+    Process Function: matches all the order data to a single product and it assigns to the order also its price and tags AND analyzes the threats and opportunities
+    '''
+    orderData = sales_analysis_gen_matcher()
+    advantages_disadvantages = AdvantageDisadvantageCal()
+    return True
