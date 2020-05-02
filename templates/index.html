@@ -1,33 +1,938 @@
 {% extends "baseTemp/base.html" %}
 
 {% block main %}
-     
-        <div class="position-relative overflow-hidden p-3 p-md-5 m-md-3 text-center bg-light">
-            <div class="col-md-12 p-lg-12 mx-auto my-5">
-              <h1 class="display-4 font-weight-normal">Punny headline</h1>
-              <p class="lead font-weight-normal">And an even wittier subheading to boot. Jumpstart your marketing efforts with this example based on Apple's marketing pages.</p>
-              <a class="btn btn-outline-secondary" href="#">Coming soon</a>
-            </div>
-            <div class="product-device box-shadow d-none d-md-block"></div>
-            <div class="product-device product-device-2 box-shadow d-none d-md-block"></div>
-        </div>
-         <div class="position-relative overflow-hidden p-3 p-md-5 m-md-3 text-center bg-light">
-            <div class="col-md-12 p-lg-12 mx-auto my-5">
-                <h1 class="display-4 font-weight-normal">Punny headline</h1>
-                <p class="lead font-weight-normal">And an even wittier subheading to boot. Jumpstart your marketing efforts with this example based on Apple's marketing pages.</p>
-                <a class="btn btn-outline-secondary" href="#">Coming soon</a>
-              </div>
-              <div class="product-device box-shadow d-none d-md-block"></div>
-              <div class="product-device product-device-2 box-shadow d-none d-md-block"></div>
-        </div>
-        <div class="position-relative overflow-hidden p-3 p-md-5 m-md-3 text-center bg-light">
-            <div class="col-md-12 p-lg-12 mx-auto my-5">
-                <h1 class="display-4 font-weight-normal">Punny headline</h1>
-                <p class="lead font-weight-normal">And an even wittier subheading to boot. Jumpstart your marketing efforts with this example based on Apple's marketing pages.</p>
-                <a class="btn btn-outline-secondary" href="#">Coming soon</a>
-              </div>
-              <div class="product-device box-shadow d-none d-md-block"></div>
-              <div class="product-device product-device-2 box-shadow d-none d-md-block"></div>
-        </div>
-{% endblock %}
+<!-- Create a div where the graph will take place -->
+<div id="advantage_Competitor_LP"></div>
+<div id="advantage_Competitor_SP"></div>
+<div id="advantage_MyCompany_LP"></div>
+<div id="advantage_MyCompanyr_SP"></div>
 
+<div id="Competitiveness_List"></div>
+<div id="Competitiveness_String"></div>
+
+<div id="Threats_List"></div>
+<div id="Threats_Street"></div>
+
+<div id="Sales"></div>
+
+<script src="https://d3js.org/d3.v5.min.js"></script>
+<script>
+  function advantage_Comp_L_f(xLabel_, yLabel_, graph_element_) {
+
+    d3.json('advantages').then(
+      function (data) {
+
+        domain_range = []
+        data = data.Competitor_LP_Advantage;
+        data.forEach(element => {
+          domain_range.push(element.q_by_Lp_0)
+          domain_range.push(element.q_by_Lp_1)
+        });
+
+        start_ = Math.min(...domain_range) * 0.99
+        end_ = Math.max(...domain_range) * 1.01
+
+        // set the dimensions and margins of the graph
+        var margin = {
+            top: 10,
+            right: 30,
+            bottom: 40,
+            left: 50
+          },
+          width = 520 - margin.left - margin.right,
+          height = 520 - margin.top - margin.bottom;
+
+        // append the svg object to the body of the page
+        var Svg = d3.select("#" + graph_element_)
+          .append("svg")
+          .attr("width", width + margin.left + margin.right)
+          .attr("height", height + margin.top + margin.bottom)
+          .append("g")
+          .attr("transform",
+            "translate(" + margin.left + "," + margin.top + ")")
+
+        // Add X axis
+        var x = d3.scaleLinear()
+          //.domain([6150, 6300])
+          .domain([start_, end_])
+          .range([0, width])
+
+        Svg.append("g")
+          .attr("transform", "translate(0," + height + ")")
+          .call(d3.axisBottom(x).tickSize(-height * 1.3).ticks(10))
+          .select(".domain").remove()
+
+        // Add Y axis
+        var y = d3.scaleLinear()
+          .domain([start_, end_])
+          .range([height, 0])
+          .nice()
+        Svg.append("g")
+          .call(d3.axisLeft(y).tickSize(-width * 1.3).ticks(7))
+          .select(".domain").remove()
+
+        // Customization
+        Svg.selectAll(".tick line").attr("stroke", "#EBEBEB")
+
+        // Add X axis label:
+        Svg.append("text")
+          .attr("text-anchor", "end")
+          .attr("x", width)
+          .attr("y", height + margin.top + 20)
+          .text(xLabel_);
+
+        // Y axis label:
+        Svg.append("text")
+          .attr("text-anchor", "end")
+          .attr("transform", "rotate(-90)")
+          .attr("y", -margin.left + 20)
+          .attr("x", -margin.top)
+          .text(yLabel_)
+
+        // Color scale: give me a specie name, I return a color
+        var color = d3.scaleOrdinal()
+          .domain(["Gold", "Bronze", "Silver", "Platinum"])
+          .range(["#402D54", "#D18975", "#8FD175", "#8FD280"])
+
+        // Add dots
+        Svg.append('g')
+          .selectAll("dot")
+          .data(data)
+          .enter()
+          .append("circle")
+          .attr("cx", function (d) {
+            return x(d.q_by_Lp_0);
+          })
+          .attr("cy", function (d) {
+            return y(d.q_by_Lp_1);
+          })
+          .attr("r", 5)
+          .style("fill", function (d) {
+            return color(d.CPU_level_tag)
+          })
+
+      })
+  }
+
+  function advantage_Comp_S_f(xLabel_, yLabel_, graph_element_) {
+
+    //Read the data
+    d3.json('advantages').then(
+      function (data) {
+
+        domain_range = []
+        data = data.Competitor_SP_Advantage;
+        data.forEach(element => {
+          domain_range.push(element.q_by_Sp_0)
+          domain_range.push(element.q_by_Sp_1)
+        });
+
+        start_ = Math.min(...domain_range) * 0.99
+        end_ = Math.max(...domain_range) * 1.01
+
+        // set the dimensions and margins of the graph
+        var margin = {
+            top: 10,
+            right: 30,
+            bottom: 40,
+            left: 50
+          },
+          width = 520 - margin.left - margin.right,
+          height = 520 - margin.top - margin.bottom;
+
+        // append the svg object to the body of the page
+        var Svg = d3.select("#" + graph_element_)
+          .append("svg")
+          .attr("width", width + margin.left + margin.right)
+          .attr("height", height + margin.top + margin.bottom)
+          .append("g")
+          .attr("transform",
+            "translate(" + margin.left + "," + margin.top + ")")
+
+        // Add X axis
+        var x = d3.scaleLinear()
+          //.domain([6150, 6300])
+          .domain([start_, end_])
+          .range([0, width])
+
+        Svg.append("g")
+          .attr("transform", "translate(0," + height + ")")
+          .call(d3.axisBottom(x).tickSize(-height * 1.3).ticks(10))
+          .select(".domain").remove()
+
+        // Add Y axis
+        var y = d3.scaleLinear()
+          .domain([start_, end_])
+          .range([height, 0])
+          .nice()
+        Svg.append("g")
+          .call(d3.axisLeft(y).tickSize(-width * 1.3).ticks(7))
+          .select(".domain").remove()
+
+        // Customization
+        Svg.selectAll(".tick line").attr("stroke", "#EBEBEB")
+
+        // Add X axis label:
+        Svg.append("text")
+          .attr("text-anchor", "end")
+          .attr("x", width)
+          .attr("y", height + margin.top + 20)
+          .text(xLabel_)
+
+        // Y axis label:
+        Svg.append("text")
+          .attr("text-anchor", "end")
+          .attr("transform", "rotate(-90)")
+          .attr("y", -margin.left + 20)
+          .attr("x", -margin.top)
+          .text(yLabel_)
+
+        // Color scale: give me a specie name, I return a color
+        var color = d3.scaleOrdinal()
+          .domain(["Gold", "Bronze", "Silver", "Platinum"])
+          .range(["#402D54", "#D18975", "#8FD175", "#8FD280"])
+
+        // Add dots
+        Svg.append('g')
+          .selectAll("dot")
+          .data(data)
+          .enter()
+          .append("circle")
+          .attr("cx", function (d) {
+            return x(d.q_by_Sp_0);
+          })
+          .attr("cy", function (d) {
+            return y(d.q_by_Sp_1);
+          })
+          .attr("r", 5)
+          .style("fill", function (d) {
+            return color(d.CPU_level_tag)
+          })
+
+      })
+  }
+
+  function advantage_MyCompany_L_f(xLabel_, yLabel_, graph_element_) {
+
+    //Read the data
+    d3.json('advantages').then(
+      function (data) {
+
+        domain_range = []
+        data = data.Competitor_LP_Advantage;
+        data.forEach(element => {
+          domain_range.push(element.q_by_Lp_0)
+          domain_range.push(element.q_by_Lp_1)
+        });
+
+        start_ = Math.min(...domain_range) * 0.99
+        end_ = Math.max(...domain_range) * 1.01
+
+        // set the dimensions and margins of the graph
+        var margin = {
+            top: 10,
+            right: 30,
+            bottom: 40,
+            left: 50
+          },
+          width = 520 - margin.left - margin.right,
+          height = 520 - margin.top - margin.bottom;
+
+        // append the svg object to the body of the page
+        var Svg = d3.select("#" + graph_element_)
+          .append("svg")
+          .attr("width", width + margin.left + margin.right)
+          .attr("height", height + margin.top + margin.bottom)
+          .append("g")
+          .attr("transform",
+            "translate(" + margin.left + "," + margin.top + ")")
+
+        // Add X axis
+        var x = d3.scaleLinear()
+          //.domain([6150, 6300])
+          .domain([start_, end_])
+          .range([0, width])
+
+        Svg.append("g")
+          .attr("transform", "translate(0," + height + ")")
+          .call(d3.axisBottom(x).tickSize(-height * 1.3).ticks(10))
+          .select(".domain").remove()
+
+        // Add Y axis
+        var y = d3.scaleLinear()
+          .domain([start_, end_])
+          .range([height, 0])
+          .nice()
+        Svg.append("g")
+          .call(d3.axisLeft(y).tickSize(-width * 1.3).ticks(7))
+          .select(".domain").remove()
+
+        // Customization
+        Svg.selectAll(".tick line").attr("stroke", "#EBEBEB")
+
+        // Add X axis label:
+        Svg.append("text")
+          .attr("text-anchor", "end")
+          .attr("x", width)
+          .attr("y", height + margin.top + 20)
+          .text(xLabel_);
+
+        // Y axis label:
+        Svg.append("text")
+          .attr("text-anchor", "end")
+          .attr("transform", "rotate(-90)")
+          .attr("y", -margin.left + 20)
+          .attr("x", -margin.top)
+          .text(yLabel_)
+
+        // Color scale: give me a specie name, I return a color
+        var color = d3.scaleOrdinal()
+          .domain(["Gold", "Bronze", "Silver", "Platinum"])
+          .range(["#402D54", "#D18975", "#8FD175", "#8FD280"])
+
+        // Add dots
+        Svg.append('g')
+          .selectAll("dot")
+          .data(data)
+          .enter()
+          .append("circle")
+          .attr("cx", function (d) {
+            return x(d.q_by_Lp_0);
+          })
+          .attr("cy", function (d) {
+            return y(d.q_by_Lp_1);
+          })
+          .attr("r", 5)
+          .style("fill", function (d) {
+            return color(d.CPU_level_tag)
+          })
+
+      })
+  }
+
+  function advantage_MyCompany_S_f(xLabel_, yLabel_, graph_element_) {
+
+    //Read the data
+    d3.json('advantages').then(
+      function (data) {
+
+        domain_range = []
+        data = data.Competitor_SP_Advantage;
+        data.forEach(element => {
+          domain_range.push(element.q_by_Sp_0)
+          domain_range.push(element.q_by_Sp_1)
+        });
+
+        start_ = Math.min(...domain_range) * 0.99
+        end_ = Math.max(...domain_range) * 1.01
+
+        // set the dimensions and margins of the graph
+        var margin = {
+            top: 10,
+            right: 30,
+            bottom: 40,
+            left: 50
+          },
+          width = 520 - margin.left - margin.right,
+          height = 520 - margin.top - margin.bottom;
+
+        // append the svg object to the body of the page
+        var Svg = d3.select("#" + graph_element_)
+          .append("svg")
+          .attr("width", width + margin.left + margin.right)
+          .attr("height", height + margin.top + margin.bottom)
+          .append("g")
+          .attr("transform",
+            "translate(" + margin.left + "," + margin.top + ")")
+
+        // Add X axis
+        var x = d3.scaleLinear()
+          //.domain([6150, 6300])
+          .domain([start_, end_])
+          .range([0, width])
+
+        Svg.append("g")
+          .attr("transform", "translate(0," + height + ")")
+          .call(d3.axisBottom(x).tickSize(-height * 1.3).ticks(10))
+          .select(".domain").remove()
+
+        // Add Y axis
+        var y = d3.scaleLinear()
+          .domain([start_, end_])
+          .range([height, 0])
+          .nice()
+        Svg.append("g")
+          .call(d3.axisLeft(y).tickSize(-width * 1.3).ticks(7))
+          .select(".domain").remove()
+
+        // Customization
+        Svg.selectAll(".tick line").attr("stroke", "#EBEBEB")
+
+        // Add X axis label:
+        Svg.append("text")
+          .attr("text-anchor", "end")
+          .attr("x", width)
+          .attr("y", height + margin.top + 20)
+          .text(xLabel_)
+
+        // Y axis label:
+        Svg.append("text")
+          .attr("text-anchor", "end")
+          .attr("transform", "rotate(-90)")
+          .attr("y", -margin.left + 20)
+          .attr("x", -margin.top)
+          .text(yLabel_)
+
+        // Color scale: give me a specie name, I return a color
+        var color = d3.scaleOrdinal()
+          .domain(["Gold", "Bronze", "Silver", "Platinum"])
+          .range(["#402D54", "#D18975", "#8FD175", "#8FD280"])
+
+        // Add dots
+        Svg.append('g')
+          .selectAll("dot")
+          .data(data)
+          .enter()
+          .append("circle")
+          .attr("cx", function (d) {
+            return x(d.q_by_Sp_0);
+          })
+          .attr("cy", function (d) {
+            return y(d.q_by_Sp_1);
+          })
+          .attr("r", 5)
+          .style("fill", function (d) {
+            return color(d.CPU_level_tag)
+          })
+
+      })
+  }
+
+  function Opportunities_L_f(xLabel_, yLabel_, graph_element_) {
+
+    //Read the data
+    d3.json('competitveness').then(
+      function (data) {
+
+        domain_range = []
+        data = data.Opportunities[0].ListPrices;
+
+
+        data.forEach(element => {
+          domain_range.push(element.q_by_Lp_AdvSrch)
+          domain_range.push(element.q_by_Lp_CompAdv)
+        });
+
+        start_ = Math.min(...domain_range) * 0.99
+        end_ = Math.max(...domain_range) * 1.01
+
+        // set the dimensions and margins of the graph
+        var margin = {
+            top: 10,
+            right: 30,
+            bottom: 40,
+            left: 50
+          },
+          width = 520 - margin.left - margin.right,
+          height = 520 - margin.top - margin.bottom;
+
+        // append the svg object to the body of the page
+        var Svg = d3.select("#" + graph_element_)
+          .append("svg")
+          .attr("width", width + margin.left + margin.right)
+          .attr("height", height + margin.top + margin.bottom)
+          .append("g")
+          .attr("transform",
+            "translate(" + margin.left + "," + margin.top + ")")
+
+        // Add X axis
+        var x = d3.scaleLinear()
+          //.domain([6150, 6300])
+          .domain([start_, end_])
+          .range([0, width])
+
+        Svg.append("g")
+          .attr("transform", "translate(0," + height + ")")
+          .call(d3.axisBottom(x).tickSize(-height * 1.3).ticks(10))
+          .select(".domain").remove()
+
+        // Add Y axis
+        var y = d3.scaleLinear()
+          .domain([start_, end_])
+          .range([height, 0])
+          .nice()
+        Svg.append("g")
+          .call(d3.axisLeft(y).tickSize(-width * 1.3).ticks(7))
+          .select(".domain").remove()
+
+        // Customization
+        Svg.selectAll(".tick line").attr("stroke", "#EBEBEB")
+
+        // Add X axis label:
+        Svg.append("text")
+          .attr("text-anchor", "end")
+          .attr("x", width)
+          .attr("y", height + margin.top + 20)
+          .text(xLabel_);
+
+        // Y axis label:
+        Svg.append("text")
+          .attr("text-anchor", "end")
+          .attr("transform", "rotate(-90)")
+          .attr("y", -margin.left + 20)
+          .attr("x", -margin.top)
+          .text(yLabel_)
+
+        // Color scale: give me a specie name, I return a color
+        var color = d3.scaleOrdinal()
+          .domain(["Gold", "Bronze", "Silver", "Platinum"])
+          .range(["#402D54", "#D18975", "#8FD175", "#8FD280"])
+
+
+
+        // Add dots
+        Svg.append('g')
+          .selectAll("dot")
+          .data(data)
+          .enter()
+          .append("circle")
+          .attr("cx", function (d) {
+            return x(d.q_by_Lp_AdvSrch);
+          })
+          .attr("cy", function (d) {
+            return y(d.q_by_Lp_CompAdv);
+          })
+          .attr("r", 5)
+          .style("fill", function (d) {
+            return color(d.CPU_level_tag)
+          })
+
+      })
+  }
+
+  function Oppotinities_S_f(xLabel_, yLabel_, graph_element_) {
+
+    //Read the data
+    d3.json('competitveness').then(
+      function (data) {
+
+        domain_range = []
+        data = data.Opportunities[1].StreetPrices;
+
+
+        data.forEach(element => {
+          domain_range.push(element.q_by_Sp_AdvSrch)
+          domain_range.push(element.q_by_Sp_CompAdv)
+        });
+
+        start_ = Math.min(...domain_range) * 0.99
+        end_ = Math.max(...domain_range) * 1.01
+
+        // set the dimensions and margins of the graph
+        var margin = {
+            top: 10,
+            right: 30,
+            bottom: 40,
+            left: 50
+          },
+          width = 520 - margin.left - margin.right,
+          height = 520 - margin.top - margin.bottom;
+
+        // append the svg object to the body of the page
+        var Svg = d3.select("#" + graph_element_)
+          .append("svg")
+          .attr("width", width + margin.left + margin.right)
+          .attr("height", height + margin.top + margin.bottom)
+          .append("g")
+          .attr("transform",
+            "translate(" + margin.left + "," + margin.top + ")")
+
+        // Add X axis
+        var x = d3.scaleLinear()
+          //.domain([6150, 6300])
+          .domain([start_, end_])
+          .range([0, width])
+
+        Svg.append("g")
+          .attr("transform", "translate(0," + height + ")")
+          .call(d3.axisBottom(x).tickSize(-height * 1.3).ticks(10))
+          .select(".domain").remove()
+
+        // Add Y axis
+        var y = d3.scaleLinear()
+          .domain([start_, end_])
+          .range([height, 0])
+          .nice()
+        Svg.append("g")
+          .call(d3.axisLeft(y).tickSize(-width * 1.3).ticks(7))
+          .select(".domain").remove()
+
+        // Customization
+        Svg.selectAll(".tick line").attr("stroke", "#EBEBEB")
+
+        // Add X axis label:
+        Svg.append("text")
+          .attr("text-anchor", "end")
+          .attr("x", width)
+          .attr("y", height + margin.top + 20)
+          .text(xLabel_);
+
+        // Y axis label:
+        Svg.append("text")
+          .attr("text-anchor", "end")
+          .attr("transform", "rotate(-90)")
+          .attr("y", -margin.left + 20)
+          .attr("x", -margin.top)
+          .text(yLabel_)
+
+        // Color scale: give me a specie name, I return a color
+        var color = d3.scaleOrdinal()
+          .domain(["Gold", "Bronze", "Silver", "Platinum"])
+          .range(["#402D54", "#D18975", "#8FD175", "#8FD280"])
+
+
+
+        // Add dots
+        Svg.append('g')
+          .selectAll("dot")
+          .data(data)
+          .enter()
+          .append("circle")
+          .attr("cx", function (d) {
+            return x(d.q_by_Sp_AdvSrch);
+          })
+          .attr("cy", function (d) {
+            return y(d.q_by_Sp_CompAdv);
+          })
+          .attr("r", 5)
+          .style("fill", function (d) {
+            return color(d.CPU_level_tag)
+          })
+
+      })
+  }
+
+function Threats_L_f(xLabel_, yLabel_, graph_element_) {
+
+//Read the data
+d3.json('competitveness').then(
+  function (data) {
+
+    domain_range = []
+    data = data.Threats[0].ListPrices;
+
+
+    data.forEach(element => {
+      domain_range.push(element.q_by_Lp_AdvSrch)
+      domain_range.push(element.q_by_Lp_CompAdv)
+    });
+
+    start_ = Math.min(...domain_range) * 0.99
+    end_ = Math.max(...domain_range) * 1.01
+
+    // set the dimensions and margins of the graph
+    var margin = {
+        top: 10,
+        right: 30,
+        bottom: 40,
+        left: 50
+      },
+      width = 520 - margin.left - margin.right,
+      height = 520 - margin.top - margin.bottom;
+
+    // append the svg object to the body of the page
+    var Svg = d3.select("#" + graph_element_)
+      .append("svg")
+      .attr("width", width + margin.left + margin.right)
+      .attr("height", height + margin.top + margin.bottom)
+      .append("g")
+      .attr("transform",
+        "translate(" + margin.left + "," + margin.top + ")")
+
+    // Add X axis
+    var x = d3.scaleLinear()
+      //.domain([6150, 6300])
+      .domain([start_, end_])
+      .range([0, width])
+
+    Svg.append("g")
+      .attr("transform", "translate(0," + height + ")")
+      .call(d3.axisBottom(x).tickSize(-height * 1.3).ticks(10))
+      .select(".domain").remove()
+
+    // Add Y axis
+    var y = d3.scaleLinear()
+      .domain([start_, end_])
+      .range([height, 0])
+      .nice()
+    Svg.append("g")
+      .call(d3.axisLeft(y).tickSize(-width * 1.3).ticks(7))
+      .select(".domain").remove()
+
+    // Customization
+    Svg.selectAll(".tick line").attr("stroke", "#EBEBEB")
+
+    // Add X axis label:
+    Svg.append("text")
+      .attr("text-anchor", "end")
+      .attr("x", width)
+      .attr("y", height + margin.top + 20)
+      .text(xLabel_);
+
+    // Y axis label:
+    Svg.append("text")
+      .attr("text-anchor", "end")
+      .attr("transform", "rotate(-90)")
+      .attr("y", -margin.left + 20)
+      .attr("x", -margin.top)
+      .text(yLabel_)
+
+    // Color scale: give me a specie name, I return a color
+    var color = d3.scaleOrdinal()
+      .domain(["Gold", "Bronze", "Silver", "Platinum"])
+      .range(["#402D54", "#D18975", "#8FD175", "#8FD280"])
+
+
+
+    // Add dots
+    Svg.append('g')
+      .selectAll("dot")
+      .data(data)
+      .enter()
+      .append("circle")
+      .attr("cx", function (d) {
+        return x(d.q_by_Lp_AdvSrch);
+      })
+      .attr("cy", function (d) {
+        return y(d.q_by_Lp_CompAdv);
+      })
+      .attr("r", 5)
+      .style("fill", function (d) {
+        return color(d.CPU_level_tag)
+      })
+
+  })
+}
+
+function Threats_S_f(xLabel_, yLabel_, graph_element_) {
+
+//Read the data
+d3.json('competitveness').then(
+  function (data) {
+
+    domain_range = []
+    data = data.Threats[1].StreetPrices;
+
+
+    data.forEach(element => {
+      domain_range.push(element.q_by_Sp_AdvSrch)
+      domain_range.push(element.q_by_Sp_CompAdv)
+    });
+
+    start_ = Math.min(...domain_range) * 0.99
+    end_ = Math.max(...domain_range) * 1.01
+
+    // set the dimensions and margins of the graph
+    var margin = {
+        top: 10,
+        right: 30,
+        bottom: 40,
+        left: 50
+      },
+      width = 520 - margin.left - margin.right,
+      height = 520 - margin.top - margin.bottom;
+
+    // append the svg object to the body of the page
+    var Svg = d3.select("#" + graph_element_)
+      .append("svg")
+      .attr("width", width + margin.left + margin.right)
+      .attr("height", height + margin.top + margin.bottom)
+      .append("g")
+      .attr("transform",
+        "translate(" + margin.left + "," + margin.top + ")")
+
+    // Add X axis
+    var x = d3.scaleLinear()
+      //.domain([6150, 6300])
+      .domain([start_, end_])
+      .range([0, width])
+
+    Svg.append("g")
+      .attr("transform", "translate(0," + height + ")")
+      .call(d3.axisBottom(x).tickSize(-height * 1.3).ticks(10))
+      .select(".domain").remove()
+
+    // Add Y axis
+    var y = d3.scaleLinear()
+      .domain([start_, end_])
+      .range([height, 0])
+      .nice()
+    Svg.append("g")
+      .call(d3.axisLeft(y).tickSize(-width * 1.3).ticks(7))
+      .select(".domain").remove()
+
+    // Customization
+    Svg.selectAll(".tick line").attr("stroke", "#EBEBEB")
+
+    // Add X axis label:
+    Svg.append("text")
+      .attr("text-anchor", "end")
+      .attr("x", width)
+      .attr("y", height + margin.top + 20)
+      .text(xLabel_);
+
+    // Y axis label:
+    Svg.append("text")
+      .attr("text-anchor", "end")
+      .attr("transform", "rotate(-90)")
+      .attr("y", -margin.left + 20)
+      .attr("x", -margin.top)
+      .text(yLabel_)
+
+    // Color scale: give me a specie name, I return a color
+    var color = d3.scaleOrdinal()
+      .domain(["Gold", "Bronze", "Silver", "Platinum"])
+      .range(["#402D54", "#D18975", "#8FD175", "#8FD280"])
+
+
+
+    // Add dots
+    Svg.append('g')
+      .selectAll("dot")
+      .data(data)
+      .enter()
+      .append("circle")
+      .attr("cx", function (d) {
+        return x(d.q_by_Sp_AdvSrch);
+      })
+      .attr("cy", function (d) {
+        return y(d.q_by_Sp_CompAdv);
+      })
+      .attr("r", 5)
+      .style("fill", function (d) {
+        return color(d.CPU_level_tag)
+      })
+
+  })
+}
+
+function Sales(xLabel_, yLabel_, graph_element_) {  
+
+//Read the data
+d3.json('sales_analysis').then(
+  function (data) {
+
+    x_scale = []
+    y_scale = []
+    data = data.data;
+ 
+    data.forEach(element => {
+
+      x_scale.push( (element.Month * 100 ) + element.OrdSeq )
+      y_scale.push( element.unit_Price_QTY)
+    });
+
+    console.log(x_scale);
+    console.log(y_scale);
+
+    xstart_ = Math.min(...x_scale) * 0.99
+    xend_   = Math.max(...x_scale) * 1.01
+    ystart_ = Math.min(...y_scale) * 0.99
+    yend_   = Math.max(...y_scale) * 1.01
+
+    // set the dimensions and margins of the graph
+    var margin = {
+        top: 10,
+        right: 30,
+        bottom: 40,
+        left: 50
+      },
+      width = 520 - margin.left - margin.right,
+      height = 520 - margin.top - margin.bottom;
+
+    // append the svg object to the body of the page
+    var Svg = d3.select("#" + graph_element_)
+      .append("svg")
+      .attr("width", width + margin.left + margin.right)
+      .attr("height", height + margin.top + margin.bottom)
+      .append("g")
+      .attr("transform",
+        "translate(" + margin.left + "," + margin.top + ")")
+
+    // Add X axis
+    var x = d3.scaleLinear()
+      //.domain([6150, 6300])
+      .domain([xstart_, xend_])
+      .range([0, width])
+
+    Svg.append("g")
+      .attr("transform", "translate(0," + height + ")")
+      .call(d3.axisBottom(x).tickSize(-height * 1.3).ticks(10))
+      .select(".domain").remove()
+
+    // Add Y axis
+    var y = d3.scaleLinear()
+      .domain([ystart_, yend_])
+      .range([height, 0])
+      .nice()
+    Svg.append("g")
+      .call(d3.axisLeft(y).tickSize(-width * 1.3).ticks(7))
+      .select(".domain").remove()
+
+    // Customization
+    Svg.selectAll(".tick line").attr("stroke", "#EBEBEB")
+
+    // Add X axis label:
+    Svg.append("text")
+      .attr("text-anchor", "end")
+      .attr("x", width)
+      .attr("y", height + margin.top + 20)
+      .text(xLabel_);
+
+    // Y axis label:
+    Svg.append("text")
+      .attr("text-anchor", "end")
+      .attr("transform", "rotate(-90)")
+      .attr("y", -margin.left + 20)
+      .attr("x", -margin.top)
+      .text(yLabel_)
+ 
+    // Add dots
+    Svg.append('g')
+      .selectAll("dot")
+      .data(data)
+      .enter()
+      .append("circle")
+      .attr("cx", function (d) {
+        return x((d.Month * 100 ) + d.OrdSeq );
+      })
+      .attr("cy", function (d) {
+        return y(d.unit_Price_QTY);
+      })
+      .attr("r", 5)
+      .style("fill", function (d) {
+        return color(d.unit_Price_QTY)
+      })
+
+  })
+}
+
+
+  advantage_Comp_L_f('List Prices My Company', 'List Prices Competitor', 'advantage_Competitor_LP');
+  advantage_Comp_S_f('Street Prices My Company', 'Street Prices Competitor', 'advantage_Competitor_SP');
+  advantage_Comp_L_f('List Prices My Company', 'List Prices Competitor', 'advantage_MyCompany_LP');
+  advantage_Comp_S_f('Street Prices My Company', 'Street Prices Competitor', 'advantage_MyCompany_SP');
+
+
+  Opportunities_L_f('Competitiveness_1', 'Competitiveness_2', 'Competitiveness_List');
+  Oppotinities_S_f('Competitiveness_1', 'Competitiveness_2', 'Competitiveness_Street');
+
+  Threats_L_f('Competitiveness_1', 'Competitiveness_2', 'Threats_List');
+  Threats_S_f('Competitiveness_1', 'Competitiveness_2', 'Threats_Street');
+
+  Sales('Month', 'Price', 'Sales');
+
+
+</script>
+{% endblock %}
+       
