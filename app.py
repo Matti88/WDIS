@@ -9,12 +9,24 @@ import Conf_Checker as CChe
 import json
 from flask import jsonify
 from flask import Flask
-from flask import render_template, send_from_directory,request, redirect
+from flask import render_template, send_from_directory,request, redirect, make_response, request
 app = Flask(__name__)
 
 app.config["OCpR_file_UPLOADS"] = ".\\uploads"
 app.config["ALLOWED_OCpR_file_EXTENSIONS"] = ["XLSX", "XLS"]
 
+def crossdomain(f):
+    def wrapped_function(*args, **kwargs):
+        resp = make_response(f(*args, **kwargs))
+        h = resp.headers
+        h['Access-Control-Allow-Origin'] = '*'
+        h['Access-Control-Allow-Methods'] = "GET, OPTIONS, POST"
+        h['Access-Control-Max-Age'] = str(21600)
+        requested_headers = request.headers.get('Access-Control-Request-Headers')
+        if requested_headers:
+            h['Access-Control-Allow-Headers'] = requested_headers
+        return resp
+    return wrapped_function
 
 def allowed_image(filename):
     '''
@@ -33,6 +45,7 @@ def allowed_image(filename):
 
 @app.route('/')
 @app.route('/index')  
+@crossdomain
 def hello():
     ''''
     Route Function: main page
@@ -87,6 +100,9 @@ def advantages():
     
     return jsonify(CC.AdvantageDisadvantageCal())
 
+@app.route("/confronts", methods=["GET"])
+def Product_on_confrontation():
+    return jsonify(CC.Product_on_confrontation())
 
 @app.route("/competitveness", methods=["GET"])
 def competitveness():

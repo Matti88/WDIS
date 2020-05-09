@@ -2,8 +2,11 @@ import pandas as pd
 import numpy as np
 import copy 
 import json
-import string_sum as sr #TODO: Name to change ASAP
-
+import importlib.util
+spec = importlib.util.spec_from_file_location("string_sum", "C:\\Users\\zuzan\\Desktop\\Projects\\WDIS\\string_sum.pyd")
+sr = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(sr)
+ 
 #FUNCTIONS
 def filter_out_descriptions_and_non_tags(df):
     '''
@@ -433,3 +436,50 @@ def threats_opportunities(path_to_the_file = r'./uploads/MyCompany.xls', prices_
     orderData = sales_analysis_gen_matcher()
     advantages_disadvantages = AdvantageDisadvantageCal()
     return True
+
+def Product_on_confrontation(MyCompany=r'./uploads/MyCompany.xls', Competitor=r'./uploads/Competitor.xls'):
+    #Competitors dataFrame
+    Competitor0 = AnalysisDF(MyCompany)
+    Competitor1 = AnalysisDF(Competitor)
+
+    #clearing out the configuration code in a very complicated way
+    Comp0 = pd.concat([Competitor0[list(filter(lambda x: 'tag' in x,  Competitor0.columns))], Competitor0[['q_by_Lp','q_by_Sp']] ] , axis=1)
+    Comp1 = pd.concat([Competitor1[list(filter(lambda x: 'tag' in x,  Competitor1.columns))], Competitor1[['q_by_Lp','q_by_Sp']] ] , axis=1)
+
+    #summarying all the combinations of tags against the average prices related to those 
+    Comp0_grouped = Comp0.groupby(list(filter(lambda x: 'tag' in x,  Comp0.columns))).mean().reset_index() 
+    Comp1_grouped = Comp1.groupby(list(filter(lambda x: 'tag' in x,  Comp1.columns))).mean().reset_index() 
+    cmmn_tags_list = list(filter(lambda x: not(('q_by_Lp' in x) or ('q_by_Sp' in x)) , common_tags(Comp0_grouped, Comp1_grouped)))
+    ocpr_df = pd.merge(Comp0_grouped, Comp1_grouped, on=cmmn_tags_list ,how='inner', suffixes=('_0', '_1'))  
+
+    #creating specific confrontation
+    bag_of_dfs_differnet_tags = {}
+    tags_of_average_combinations = list(filter(lambda x: ('_tag' in x), ocpr_df.columns))
+    for index, row_ in ocpr_df.iterrows():
+        bag_of_tags = []
+        for tag_name in tags_of_average_combinations:
+            bag_of_tags.append(str(row_[tag_name]))
+
+        dic_for_selection = dict(zip(tags_of_average_combinations, bag_of_tags))
+        query = ' and '.join([f'{k} == {repr(v)}' for k, v in dic_for_selection.items()]) 
+
+        averages_  = ocpr_df.query(query)
+        My_Company = Competitor0.query(query)
+        Competitor = Competitor1.query(query)
+        step_1 = pd.merge(averages_,  My_Company,  on=common_tags(averages_,  My_Company), how='inner')
+        step_2 = pd.merge(averages_,  Competitor,  on=common_tags(averages_,     Competitor), how='inner')
+
+        step_1['Vendor'] = 'MyCompany'
+        step_2['Vendor'] = 'Competitor'
+        concatenated = pd.concat( [step_1,step_2 ], ignore_index=True)
+        bag_of_dfs_differnet_tags['_'.join(bag_of_tags)] = concatenated.to_json(orient="records") 
+
+    #generating json file 
+    string_JSON  = ''
+    for tags_compositions in bag_of_dfs_differnet_tags.keys():
+        string_JSON_template = "{" + f""" "{tags_compositions}" : {bag_of_dfs_differnet_tags[tags_compositions]} """ + '} ,' 
+        string_JSON = string_JSON + string_JSON_template
+    return_string_JSON = "[" + string_JSON[:-2] + "]"
+    file_like_object = json.loads(return_string_JSON)
+
+    return file_like_object
