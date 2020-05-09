@@ -2,10 +2,11 @@ import pandas as pd
 import numpy as np
 import copy 
 import json
-import importlib.util
-spec = importlib.util.spec_from_file_location("string_sum", "C:\\Users\\zuzan\\Desktop\\Projects\\WDIS\\string_sum.pyd")
-sr = importlib.util.module_from_spec(spec)
-spec.loader.exec_module(sr)
+# import importlib.util
+# spec = importlib.util.spec_from_file_location("string_sum", "C:\\Users\\zuzan\\Desktop\\Projects\\WDIS\\string_sum.pyd")
+# sr = importlib.util.module_from_spec(spec)
+# spec.loader.exec_module(sr)
+import string_sum as sr
  
 #FUNCTIONS
 def filter_out_descriptions_and_non_tags(df):
@@ -376,7 +377,7 @@ def ThreatsOpportunitiesCal(MyCompany=r'./uploads/MyCompany.xls', Competitor=r'.
 
     return Threats_and_Opportunities
 
-def sales_analysis_gen_matcher(path_to_the_file = r'./uploads/MyCompany.xls', prices_tables=['Street_Prices', 'List_Prices'], order_tables = ['OrderData']):
+def sales_analysis_gen_matcher(path_to_the_file = r'./uploads/MyCompany.xls',  MyCompany=r'./uploads/MyCompany.xls', Competitor=r'./uploads/Competitor.xls', prices_tables=['Street_Prices', 'List_Prices'], order_tables = ['OrderData']):
     '''
     Process Function: matches all the order data to a single product and it assigns to the order also its price and tags
     '''
@@ -425,8 +426,39 @@ def sales_analysis_gen_matcher(path_to_the_file = r'./uploads/MyCompany.xls', pr
     Model_Tags['code'] = Model_Tags.index
     Model_Tags['code'] = Model_Tags['code'].astype(int)
 
+    #generating all dataFrames
+    dfs_ = ADOT_dfs(MyCompany, Competitor)
+    Competitor0, Competitor1, Comp0, Comp1, Comp0_grouped, Comp1_grouped  = dfs_[0], dfs_[1], dfs_[2], dfs_[3], dfs_[4], dfs_[5]
+
+    #selecting the columns 
+    cmmn_tags_list = list(filter(lambda x: not(('q_by_Lp' in x) or ('q_by_Sp' in x)) , common_tags(Comp0_grouped, Comp1_grouped)))
+    ocpr_df = pd.merge(Comp0_grouped, Comp1_grouped, on=cmmn_tags_list ,how='inner', suffixes=('_0', '_1'))     
+
+    #criteria for selections
+    MyCompany_SP_Advantage  = ocpr_df[ocpr_df['q_by_Sp_0'] < ocpr_df['q_by_Sp_1']]
+    Competitor_SP_Advantage = ocpr_df[ocpr_df['q_by_Sp_0'] > ocpr_df['q_by_Sp_1']]
+    #products that are in the advantage categories
+    MyCompany_SP_Advantage_codes = pd.merge(Competitor0, MyCompany_SP_Advantage, on=common_tags(Competitor0, MyCompany_SP_Advantage), how='inner')  
+    #products that are in the dis_advantage categories
+    Competitor_SP_Advantage_codes = pd.merge(Competitor0, Competitor_SP_Advantage, on=common_tags(Competitor0, Competitor_SP_Advantage), how='inner')  
+
+
+    #Generating the dictionary map
+    codes_that_are_in_competitive_classes = list(MyCompany_SP_Advantage_codes['code'])
+    codes_that_arnt_in_competitive_classes = list(Competitor_SP_Advantage_codes['code'])
+    list_of_common_codes_ = list(set(codes_that_are_in_competitive_classes).intersection(set(codes_that_arnt_in_competitive_classes)))
+    dic_for_mapping_competitiveness_advantage    = dict(zip(codes_that_are_in_competitive_classes, ['Advantage']* len(codes_that_are_in_competitive_classes)))
+    dic_for_mapping_competitiveness_disadvantage = dict(zip(codes_that_arnt_in_competitive_classes, ['Disadvantage']* len(codes_that_arnt_in_competitive_classes)))
+    dic_for_mapping_competitiveness = {**dic_for_mapping_competitiveness_advantage , **dic_for_mapping_competitiveness_disadvantage}
+
+    #adding to the orders the model that is most appropriate 
     analyzed_orders = pd.merge(orders_match_prices, Model_Tags, on=['code'])
-    data =  {'data' : json.loads(analyzed_orders.to_json(orient="records") )}
+
+    #adding the decisor field for the violin plot
+    analyzed_orders['Competitive_Flag'] = analyzed_orders['code'].map(dic_for_mapping_competitiveness)
+
+
+    data =   json.loads(analyzed_orders.to_json(orient="records") ) 
     return data
 
 def threats_opportunities(path_to_the_file = r'./uploads/MyCompany.xls', prices_tables=['Street_Prices', 'List_Prices'], order_tables = ['OrderData']):

@@ -117,8 +117,7 @@ function compare_histogram(data_from_query, id_element, tranforming_function){
 
   var all_values = y1.concat(y2); 
   all_values = all_values.filter(function( element ) {  return element !== undefined; });
-
-console.log(all_values);
+ 
 var min = Math.min( ...all_values ),
     max = Math.max( ...all_values );
  
@@ -132,7 +131,83 @@ var min = Math.min( ...all_values ),
   Plotly.newPlot(id_element, data, layout);
 }
   
+function violin_history(data_){
+  
+  function unpack(rows, key, side_criteria) {
+ 
+      function side_chek (row) { return side_criteria == row['Competitive_Flag']; }
 
+      rows = rows.filter(side_chek);
+
+      return rows.map(function(row) { return row[key]; });
+  }
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+  var data = [{
+    type: 'violin',
+    x: unpack(data_, 'Month', 'Advantage' ),
+    y: unpack(data_, 'unit_Price_QTY', 'Advantage'),
+    legendgroup: 'Advantages',
+    scalegroup: 'Advantages',
+    name: 'Advantages',
+    side: 'negative',
+    box: {
+      visible: false
+    },
+    line: {
+      color: 'blue',
+      width: 2
+    },
+    meanline: {
+      visible: true
+    }
+  }, {
+    type: 'violin',
+  x: unpack(data_, 'Month', 'Disadvantage'),
+  y: unpack(data_, 'unit_Price_QTY', 'Disadvantage'),
+    legendgroup: 'Disadvantages',
+    scalegroup: 'NDisadvantageso',
+    name: 'Disadvantages',
+    side: 'positive',
+    box: {
+      visible: false
+    },
+    line: {
+      color: 'green',
+      width: 2
+    },
+    meanline: {
+      visible: true
+    }
+  }]
+  
+  var layout = {
+    title: "Split Violin Plot",
+    yaxis: {
+      zeroline: false
+    },
+    violingap: 0,
+    violingroupgap: 0,
+    violinmode: "overlay",
+  }
+
+Plotly.newPlot('violin_', data, layout);
+
+}
 
 // transformation functions 
 function dtransf_LP_advantages(data){
@@ -338,12 +413,15 @@ function updateGraphs(){
      }
      ); 
     });
+
+  $.get( '/sales_analysis', 
+  function( data ) {  
+    console.log(data);
+    violin_history(data);
+    });
   }
 
 
 updateGraphs();
  
- 
-
-
  
