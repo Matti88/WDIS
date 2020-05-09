@@ -1,37 +1,94 @@
 
 // Plotting Functions
-function simpleScatterplot(data_from_query, id_element, tranforming_function){
+function scatter_avg_category_comparison(data_from_query, id_element, tranforming_function){
   
   var transformed_data = tranforming_function(data_from_query);
-  var x_ = transformed_data[0]
-  var y_ = transformed_data[1];
+  var x_1 = transformed_data[0]
+  var y_1 = transformed_data[1];
+  var label_1 = transformed_data[2]
+  var x_2 = transformed_data[3];
+  var y_2 = transformed_data[4]
+  var label_2 = transformed_data[5];
+  var Title_ = transformed_data[6];
+  var avg_lp_1_ = transformed_data[7];
+  var avg_sp_1_ = transformed_data[8];
+  var avg_lp_2_ = transformed_data[9];
+  var avg_sp_2_ = transformed_data[10];
 
-  var element_object = document.getElementById(id_element),
-      hoverInfo = document.getElementById('hoverinfo'),
-   
-    data_ = [{
-            x:x_
-          , y:y_
-          , type:'scatter'
-          , name:'Trial 1'
-          , mode:'markers'
-          , marker:{size:20}}
-        ],
-    layout = {hovermode:'closest',  title:'Scatter List Price<br>VS Street Price'};
 
-    Plotly.newPlot(id_element, data_, layout);
- 
-    element_object.on('plotly_hover', function(data_){
-          var xaxis = data_.points[0].xaxis,  yaxis =  data_.points[1].yaxis;
-          var infotext = data_.points.map(function(d){
-              return ('width: '+xaxis.l2p(d.x)+', height: '+yaxis.l2p(d.y)); 
-                                            });
+  var trace1 = {
+    x: x_1,
+    y: y_1,
+    mode: 'markers+text',
+    type: 'scatter',
+    name: 'My Company',
+    text: label_1,
+    textposition: 'top center',
+    textfont: {
+      family:  'Raleway, sans-serif'
+    },
+    marker: { size: 12 }
+  };
+  var trace2 = {
+    x: x_2,
+    y: y_2,
+    mode: 'markers+text',
+    type: 'scatter',
+    name: 'Competitor',
+    text: label_2,
+    textfont : {
+      family:'Times New Roman'
+    },
+    textposition: 'bottom center',
+    marker: { size: 12 }
+  };
+  var avg_lp_1 = {
+    x: avg_lp_1_,
+    y: y_1,
+    name: 'avg_lp_MyC',
+    mode: 'lines',
+    type: 'scatter'
+  };
+  var avg_sp_1 = {
+    x: x_1,
+    y: avg_sp_1_,
+    name: 'avg_sp_MyC',
+    mode: 'lines',
+    type: 'scatter'
+  };
+  var avg_lp_2 = {
+    x: avg_lp_2_,
+    y: y_2,
+    name: 'avg_lp_Com',
+    mode: 'lines',
+    type: 'scatter'
+  };
+  var avg_sp_s = {
+    x: x_2,
+    y: avg_sp_2_,
+    name: 'avg_sp_Com',
+    mode: 'lines',
+    type: 'scatter'
+  };
 
-          hoverInfo.innerHTML = infotext.join('<br/>');
-    })
-    .on('plotly_unhover', function(data_){
-        hoverInfo.innerHTML = '';
-    });
+  var data = [ trace1, trace2, avg_lp_1, avg_sp_1,  avg_lp_2, avg_sp_2, avg_sp_s ];
+  
+
+  var layout = {
+
+    legend: {
+      y: 0.5,
+      yref: 'paper',
+      font: {
+        family: 'Arial, sans-serif',
+        size: 20,
+        color: 'grey',
+      }
+    },
+    title: Title_
+  };
+  
+  Plotly.newPlot(id_element, data, layout);
 
   }     
 
@@ -57,12 +114,26 @@ function compare_histogram(data_from_query, id_element, tranforming_function){
   };
   
   var data = [trace1, trace2];
-  
-  var layout = {barmode: 'group'};
+
+  var all_values = y1.concat(y2); 
+  all_values = all_values.filter(function( element ) {  return element !== undefined; });
+
+console.log(all_values);
+var min = Math.min( ...all_values ),
+    max = Math.max( ...all_values );
+ 
+  var layout = {
+    yaxis: {
+      range: [min*0.99, max*1.01 ],
+      title: 'Average prices per Category'
+    }, 
+    barmode: 'group'};
   
   Plotly.newPlot(id_element, data, layout);
 }
   
+
+
 // transformation functions 
 function dtransf_LP_advantages(data){
   data = data['Competitor_LP_Advantage'].concat(data['MyCompany_LP_Advantage']);
@@ -116,7 +187,80 @@ function dtransf_SP_advantages(data){
   return [x, y1, y2]
 }
 
+function dtransf_confrontation_scatterplot(data){
+ 
+  var ks_ = Object.keys(data);
+  var Title_ = ks_[0]
+  data = data[Title_]
 
+  //MyCompany section
+  x_1 = data.map(item => {
+    if (item['Vendor'] == 'MyCompany') {
+      return item['q_by_Lp'];
+    }
+  })
+
+  y_1 = data.map(item => {
+    if (item['Vendor'] == 'MyCompany') {
+      return item['q_by_Sp'];
+    }
+  })
+
+  label_1 = data.map(item => {
+    if (item['Vendor'] == 'MyCompany') {
+      return item['code'];
+    }
+  })
+
+  avg_lp_1 = data.map(item => {
+    if (item['Vendor'] == 'MyCompany') {
+      return item['q_by_Lp_0'];
+    }
+  })	
+
+  avg_sp_1 = data.map(item => {
+    if (item['Vendor'] == 'MyCompany') {
+      return item['q_by_Sp_0'];
+    }
+  })	
+
+
+  //competitor section
+  x_2 = data.map(item => {
+    if (item['Vendor'] == 'Competitor') {
+      return item['q_by_Lp'];
+    }
+  })
+ 
+  y_2 = data.map(item => {
+    if (item['Vendor'] == 'Competitor') {
+      return item['q_by_Sp'];
+    }
+  })
+
+  label_2 = data.map(item => {
+    if (item['Vendor'] == 'Competitor') {
+      return item['code'];
+    }
+  })
+
+  avg_lp_2 = data.map(item => {
+    if (item['Vendor'] == 'Competitor') {
+      return item['q_by_Lp_1'];
+    }
+  })	
+
+  avg_sp_2 = data.map(item => {
+    if (item['Vendor'] == 'Competitor') {
+      return item['q_by_Sp_1'];
+    }
+  })	
+
+  return [x_1, y_1, label_1,  x_2, y_2 , label_2, Title_, avg_lp_1, avg_sp_1, avg_lp_2, avg_sp_2]
+}
+
+
+//old transformation
 function data_tansformation_CompAdvantage_lp(data){
   data = data['Competitor_LP_Advantage'];
  
@@ -127,7 +271,7 @@ function data_tansformation_CompAdvantage_lp(data){
    y = data.map(item => { 
       return item.q_by_Lp_1;
   })
-  console.log(x, y);
+
   return  [x ,  y]
 }
 
@@ -179,12 +323,23 @@ function updateGraphs(){
   function( data ) { 
     compare_histogram(data,'barChart_1' , dtransf_LP_advantages);
     compare_histogram(data,'barChart_2' , dtransf_SP_advantages);
-    simpleScatterplot(data, 'scatter_1', data_tansformation_CompAdvantage_lp);
-    // simpleScatterplot(data, 'scatter_2', data_tansformation_CompAdvantage_sp);
-    // simpleScatterplot(data, 'scatter_3', data_tansformation_MyCompany_lp);
-    // simpleScatterplot(data, 'scatter_4', data_tansformation_MyCompany_sp);
   }); 
-}
+
+  $.get( '/confronts', 
+  function( data ) { 
+    $(document).ready(function() {
+      for(var i = 0; i <= data.length-1 ; i++) {
+       $('#scatter_section').append('<div id="scatter_' + i + '"></ div>' );
+      }
+      for(var i = 0; i <= data.length-1 ; i++) {
+        scatter_avg_category_comparison(data[i], "scatter_" + i, dtransf_confrontation_scatterplot );
+
+       }
+     }
+     ); 
+    });
+  }
+
 
 updateGraphs();
  
