@@ -141,20 +141,7 @@ function violin_history(data_){
 
       return rows.map(function(row) { return row[key]; });
   }
-
-
-
-
-
-
-
-
-
-
-
   
-
-
 
 
   var data = [{
@@ -394,11 +381,25 @@ function data_tansformation_MyCompany_sp(data){
 
 //jQuery call functions 
 function updateGraphs(){
-  $.get( '/advantages', 
-  function( data ) { 
-    compare_histogram(data,'barChart_1' , dtransf_LP_advantages);
-    compare_histogram(data,'barChart_2' , dtransf_SP_advantages);
-  }); 
+  
+  $.ajax({
+    url: '/advantages',
+    type: 'GET',
+    headers: { Authorization: $`Bearer ${localStorage.getItem("token")}` },
+    data: {},
+    success:  function( data ) { 
+      compare_histogram(data,'barChart_1' , dtransf_LP_advantages);
+      compare_histogram(data,'barChart_2' , dtransf_SP_advantages);
+    },
+    error: function (data) { console.log('did not have access') },
+    });
+
+
+  // $.get( '/advantages', 
+  // function( data ) { 
+  //   compare_histogram(data,'barChart_1' , dtransf_LP_advantages);
+  //   compare_histogram(data,'barChart_2' , dtransf_SP_advantages);
+  // }); 
 
   $.get( '/confronts', 
   function( data ) { 
@@ -415,8 +416,7 @@ function updateGraphs(){
     });
 
   $.get( '/sales_analysis', 
-  function( data ) {  
-    console.log(data);
+  function( data ) {   
     violin_history(data);
     });
   }

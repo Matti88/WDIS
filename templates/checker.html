@@ -8,7 +8,6 @@
                 <h1 class="display-4">Welcome to the "Where do I stand" (W.d.I.s) calculator!</h1>
                 <p class="lead">Upload the model files for your Company's products and your Target Competitor's </p>
                 <hr class="my-4">
-
                 <div class="alert alert-warning alert-dismissible fade show" role="alert">
                     <p>
                         <strong>How to process a file ?</strong>
@@ -26,76 +25,83 @@
                 </div>
             </div>
         </div>
- 
+        </br>
+        <div class="row">
+            <div id="myCompany" class="col">
+                <div class="container" id="MyCompanyUpload">
+                    <div class="row">
+                        <div class="col">
+                            <h1>Your Company Model</h1>
+                            <hr>
+                            <form id="calcFormMyCompany" action="/upload-OCpR_file" method="POST"
+                                enctype="multipart/form-data">
+                                <div class="form-group">
+                                    <label>Select your model's file</label>
+                                    <div class="custom-file">
+                                        <input type="file" class="custom-file-input" name="file" id="OCpR_file">
+                                        <label class="custom-file-label" id="fileLabel" for="OCpR_file">Select
+                                            file...</label>
+                                    </div>
+                                </div>
+                                <button type="submit" class="btn btn-primary" id="uploadButn1">Upload and
+                                    Validate</button>
+                                <button type="button" class="btn btn-primary" comp="myCompany"
+                                    onclick="calculateOCpR(this)" id="prcsCal">Calculate OCpR</button>
+                            </form>
 
-</br>
-    <div class="row">
-    <div id="myCompany" class="col">
-        <div class="container" id="MyCompanyUpload">
-            <div class="row">
-                <div class="col">
-                    <h1>Your Company Model</h1>
-                    <hr>
-                    <form id="calcFormMyCompany" action="/upload-OCpR_file" method="POST"  enctype="multipart/form-data">
-                        <div class="form-group">
-                            <label>Select your model's file</label>
-                            <div class="custom-file">
-                                <input type="file" class="custom-file-input" name="file" id="OCpR_file">
-                                <label class="custom-file-label" id="fileLabel" for="OCpR_file">Select file...</label>
-                            </div>
                         </div>
-                        <button type="submit" class="btn btn-primary" id="uploadButn1">Upload and Validate</button>
-                        <button type="button" class="btn btn-primary" comp="myCompany" onclick="calculateOCpR(this)" id="prcsCal">Calculate OCpR</button>
-                    </form>
+                    </div>
+                </div>
+                <br />
+                <div class="container" id="MyCompanyAlerts">
 
                 </div>
-            </div>
-        </div>
-        <br />
-        <div class="container" id="MyCompanyAlerts">
 
-        </div>
-        
-        <br />
-        <div class="container" id="MyCompanyChart">
-            <canvas id="myChart" comp="myCompany" width="50" height="50"></canvas>
-        </div>
-    </div>
-    <div id="Competitor" class="col">
-        <div class="container" id="CompetitorUpload">
-            <div class="row">
-                <div class="col">
-                    <h1>Competitor Model</h1>
-                    <hr>
-                    <form id="calcForm2" action="/upload-OCpR_file" method="POST" enctype="multipart/form-data">
-                        <div class="form-group">
-                            <label>Select OCpR_file</label>
-                            <div class="custom-file">
-                                <input type="file" class="custom-file-input" name="file" id="OCpR2">
-                                <label class="custom-file-label" id="fileLabel2" for="OCpR2">Select file...</label>
-                            </div>
-                        </div>
-                        <button type="submit" class="btn btn-primary" id="uploadButn">Upload and Validate</button>
-                        <button type="button" class="btn btn-primary" comp="myCompany" onclick="calculateOCpR(this)" id="prcsCal">Calculate OCpR</button>
-                    </form>
+                <br />
+                <div class="container" id="MyCompanyChart">
+                    <canvas id="myChart" comp="myCompany" width="50" height="50"></canvas>
                 </div>
             </div>
+            <div id="Competitor" class="col">
+                <div class="container" id="CompetitorUpload">
+                    <div class="row">
+                        <div class="col">
+                            <h1>Competitor Model</h1>
+                            <hr>
+                            <form id="calcForm2" action="/upload-OCpR_file" method="POST" enctype="multipart/form-data">
+                                <div class="form-group">
+                                    <label>Select OCpR_file</label>
+                                    <div class="custom-file">
+                                        <input type="file" class="custom-file-input" name="file" id="OCpR2">
+                                        <label class="custom-file-label" id="fileLabel2" for="OCpR2">Select
+                                            file...</label>
+                                    </div>
+                                </div>
+                                <button type="submit" class="btn btn-primary" id="uploadButn">Upload and
+                                    Validate</button>
+                                <button type="button" class="btn btn-primary" comp="myCompany"
+                                    onclick="calculateOCpR(this)" id="prcsCal">Calculate OCpR</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <br />
+            </div>
         </div>
-        <br />
-        <div class="container" id="CompetitorAlerts">
-                 
+        <div class="row">
+            <div class="container" id="CompetitorChart">
+                <div id="violin_"></div>
+                <div id="barChart_1"></div>
+                <div id="barChart_2"></div>
+                <div id="scatter_section"></div>
+            </div>
         </div>
-        
-        <br />
-        <div class="container" id="CompetitorChart">
-            <canvas id="myChart2" comp="myCompetitor" width="50" height="50"></canvas>
-        </div>
-    </div>
     </div>
 </main>
 {% endblock %}
 
 {% block script1 %}
+<script src="static/js/scatterchart.js" language="javascript" mimetype="text/javascript"></script>
 
     <script language="javascript" type="text/javascript">
 

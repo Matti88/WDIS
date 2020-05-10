@@ -10,23 +10,58 @@ import json
 from flask import jsonify
 from flask import Flask
 from flask import render_template, send_from_directory,request, redirect, make_response, request
+
+
+from flask import Flask, jsonify, request
+from flask_jwt_extended import (
+    JWTManager, jwt_required, create_access_token,
+    get_jwt_identity
+)
+
+
 app = Flask(__name__)
+
+# Setup the Flask-JWT-Extended extension
+app.config['JWT_SECRET_KEY'] = 'super-secret'  # Change this!
+jwt = JWTManager(app)
+
 
 app.config["OCpR_file_UPLOADS"] = ".\\uploads"
 app.config["ALLOWED_OCpR_file_EXTENSIONS"] = ["XLSX", "XLS"]
 
-def crossdomain(f):
-    def wrapped_function(*args, **kwargs):
-        resp = make_response(f(*args, **kwargs))
-        h = resp.headers
-        h['Access-Control-Allow-Origin'] = '*'
-        h['Access-Control-Allow-Methods'] = "GET, OPTIONS, POST"
-        h['Access-Control-Max-Age'] = str(21600)
-        requested_headers = request.headers.get('Access-Control-Request-Headers')
-        if requested_headers:
-            h['Access-Control-Allow-Headers'] = requested_headers
-        return resp
-    return wrapped_function
+
+# Provide a method to create access tokens. The create_access_token()
+# function is used to actually generate the token, and you can return
+# it to the caller however you choose.
+@app.route('/login', methods=['POST'])
+def login():
+    if not request.is_json:
+        return jsonify({"msg": "Missing JSON in request"}), 400
+    
+    username = request.json.get('login', None)
+    password = request.json.get('password', None)
+ 
+    if not username:
+        return jsonify({"msg": "Missing username parameter"}), 400
+    if not password:
+        return jsonify({"msg": "Missing password parameter"}), 400
+
+    if username != 'test' or password != 'test':
+        return jsonify({"msg": "Bad username or password"}), 401
+
+    # Identity can be any data that is json serializable
+    access_token = create_access_token(identity=username)
+    return jsonify(access_token=access_token), 200
+
+
+# Protect a view with jwt_required, which requires a valid access token
+# in the request to access.
+@app.route('/protected', methods=['GET'])
+@jwt_required
+def protected():
+    # Access the identity of the current user with get_jwt_identity
+    current_user = get_jwt_identity()
+    return jsonify(logged_in_as=current_user), 200
 
 def allowed_image(filename):
     '''
@@ -45,14 +80,22 @@ def allowed_image(filename):
 
 @app.route('/')
 @app.route('/index')  
-@crossdomain
 def hello():
     ''''
     Route Function: main page
     '''
     return render_template("index.html")
 
-@app.route('/checker')  
+ 
+@app.route('/access_page')  
+def login_access():
+    ''''
+    Route Function: main page
+    '''
+    return render_template("login.html")
+
+
+@app.route('/checker')
 def cheker():
     ''''
     Route Function: main page
@@ -94,10 +137,12 @@ def Checker_OCpR():
 
     #return render_template("index.html")
     return data
-   
+
+
 @app.route("/advantages", methods=["GET"])
+@jwt_required
 def advantages():
-    
+    print(request.form)
     return jsonify(CC.AdvantageDisadvantageCal())
 
 @app.route("/confronts", methods=["GET"])
