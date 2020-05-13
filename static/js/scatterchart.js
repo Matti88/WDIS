@@ -383,7 +383,7 @@ function data_tansformation_MyCompany_sp(data){
 function updateGraphs(){
   
   $.ajax({
-    url: '/advantages',
+    url: '/checker/advantages',
     type: 'GET',
     headers: { Authorization: $`Bearer ${localStorage.getItem("token")}` },
     data: {},
@@ -393,15 +393,9 @@ function updateGraphs(){
     },
     error: function (data) { console.log('did not have access') },
     });
+ 
 
-
-  // $.get( '/advantages', 
-  // function( data ) { 
-  //   compare_histogram(data,'barChart_1' , dtransf_LP_advantages);
-  //   compare_histogram(data,'barChart_2' , dtransf_SP_advantages);
-  // }); 
-
-  $.get( '/confronts', 
+  $.get( '/checker/confronts', 
   function( data ) { 
     $(document).ready(function() {
       for(var i = 0; i <= data.length-1 ; i++) {
@@ -415,7 +409,7 @@ function updateGraphs(){
      ); 
     });
 
-  $.get( '/sales_analysis', 
+  $.get( '/checker/sales_analysis', 
   function( data ) {   
     violin_history(data);
     });

@@ -326,9 +326,10 @@
             data: data_to_send,
             contentType: 'application/json',
             success: function(data) { 
-                 sessionStorage.setItem('token', data['access_token']); 
-                console.log(data); 
-                window.location = "/checker";
+                  if (data['login'] = true){
+                  window.location = "/checker";
+                  }
+
             }
 
             });
