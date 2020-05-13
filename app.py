@@ -6,8 +6,8 @@ from flask_jwt_extended import (
     JWTManager, jwt_required, create_access_token,
     jwt_refresh_token_required, create_refresh_token,
     get_jwt_identity, set_access_cookies,
-    set_refresh_cookies, unset_jwt_cookies
-)
+    set_refresh_cookies, unset_jwt_cookies 
+    )
 
 app = Flask(__name__)
 
@@ -78,7 +78,7 @@ def logout():
     resp = jsonify({'logout': True})
     unset_jwt_cookies(resp)
     return resp, 200
-    
+
 
 #Main View
 @app.route('/')

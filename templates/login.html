@@ -7,6 +7,9 @@
  
 <!------ Include the above in your HEAD tag ---------->
 
+ 
+
+
 <style>
     /* BASIC */
     
@@ -273,6 +276,8 @@
 <div class="wrapper fadeInDown">
   <div id="formContent">
     <!-- Tabs Titles -->
+    <h2 class="active" onclick="change_sign_up_and_in(false)" id="si_"> Sign In </h2>
+    <h2 class="inactive underlineHover" onclick="change_sign_up_and_in(true)" id="su_">Sign Up </h2>
 
     <!-- Icon -->
     <div class="fadeIn first">
@@ -283,7 +288,7 @@
     <form method="post" action="/login" enctype="multipart/form-data" id="id_Col" >
       <input type="text" id="login" class="fadeIn second" name="login" placeholder="login">
       <input type="text" id="password" class="fadeIn third" name="password" placeholder="password">
-      <input type="submit" class="fadeIn fourth" value="Log In">
+      <input type="submit" class="fadeIn fourth" value="Log In" id="button">
     </form>
 
     <!-- Remind Passowrd -->
@@ -298,6 +303,24 @@
 {% block script1 %}
 
     <script language="javascript" type="text/javascript">
+
+
+        function change_sign_up_and_in(value_){
+
+          if (value_){
+            $('#button').val('Sign In');
+            $('#si_').attr('class', 'inactive underlineHover');
+            $('#su_').attr('class', 'active');
+          
+            
+          }
+          else{
+            $('#button').val('Log In');
+            $('#si_').attr('class', 'active');
+            $('#su_').attr('class', 'inactive underlineHover');
+           
+          }
+        }
 
         function getFormData($form){
             var unindexed_array = $form.serializeArray();
