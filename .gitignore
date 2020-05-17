@@ -10,3 +10,4 @@ zzz.py
 *.cargo-lock
 /hammingDistance/target
 /hammingDistance/Cargo.lock
+/admin_pages

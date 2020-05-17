@@ -1,7 +1,13 @@
+
+
 import Conf_Calculator as CC
 import Conf_Checker as CChe
 import os 
-from flask import Flask, jsonify, request, render_template, make_response, redirect, url_for
+from flask import (Flask, 
+            jsonify, request, render_template
+            , make_response, redirect, url_for
+            ,send_from_directory, current_app
+            ) 
 from flask_jwt_extended import (
     JWTManager, jwt_required, create_access_token,
     jwt_refresh_token_required, create_refresh_token,
@@ -10,6 +16,8 @@ from flask_jwt_extended import (
     )
 
 app = Flask(__name__)
+app.config['RESULT_STATIC_PATH'] = "results/"
+
 
 # Configure application to store JWTs in cookies
 app.config['JWT_TOKEN_LOCATION'] = ['cookies']
@@ -81,22 +89,14 @@ def logout():
 
 
 #Main View
-@app.route('/')
-@app.route('/index')  
-def hello(): 
-    return render_template("index.html")
-
-#App Views
-@app.route('/access_page')
-def login_access(): 
-    return render_template("login.html")
-
-@app.route('/checker', methods=['GET'])
-@jwt_required
-def cheker(): 
-    return render_template("checker.html")
-
-
+@app.route('/results/<path:filename>')
+def serve_static(filename):
+    if filename.endswith("index.html"):
+        return send_from_directory("results/",  "login.html")
+    else:
+        return send_from_directory("results/", filename)
+ 
+   
 
 #api for the analysis 
 @app.route("/checker/advantages", methods=["GET"])
