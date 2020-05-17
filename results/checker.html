@@ -23,9 +23,138 @@
   <!-- Custom styles for this template-->
   <link href="vendor/dropzone-5.7.0/dist/min/dropzone.min.css" rel="stylesheet">
 
+  <!-- Custom Style for this page -->
+  <Style>/* Absolute Center Spinner */
+    .loading {
+      position: fixed;
+      z-index: 999;
+      height: 2em;
+      width: 2em;
+      overflow: show;
+      margin: auto;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      right: 0;
+    }
+    
+    /* Transparent Overlay */
+    .loading:before {
+      content: '';
+      display: block;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+        background: radial-gradient(rgba(20, 20, 20,.8), rgba(0, 0, 0, .8));
+    
+      background: -webkit-radial-gradient(rgba(20, 20, 20,.8), rgba(0, 0, 0,.8));
+    }
+    
+    /* :not(:required) hides these rules from IE9 and below */
+    .loading:not(:required) {
+      /* hide "loading..." text */
+      font: 0/0 a;
+      color: transparent;
+      text-shadow: none;
+      background-color: transparent;
+      border: 0;
+    }
+    
+    .loading:not(:required):after {
+      content: '';
+      display: block;
+      font-size: 10px;
+      width: 1em;
+      height: 1em;
+      margin-top: -0.5em;
+      -webkit-animation: spinner 150ms infinite linear;
+      -moz-animation: spinner 150ms infinite linear;
+      -ms-animation: spinner 150ms infinite linear;
+      -o-animation: spinner 150ms infinite linear;
+      animation: spinner 150ms infinite linear;
+      border-radius: 0.5em;
+      -webkit-box-shadow: rgba(255,255,255, 0.75) 1.5em 0 0 0, rgba(255,255,255, 0.75) 1.1em 1.1em 0 0, rgba(255,255,255, 0.75) 0 1.5em 0 0, rgba(255,255,255, 0.75) -1.1em 1.1em 0 0, rgba(255,255,255, 0.75) -1.5em 0 0 0, rgba(255,255,255, 0.75) -1.1em -1.1em 0 0, rgba(255,255,255, 0.75) 0 -1.5em 0 0, rgba(255,255,255, 0.75) 1.1em -1.1em 0 0;
+    box-shadow: rgba(255,255,255, 0.75) 1.5em 0 0 0, rgba(255,255,255, 0.75) 1.1em 1.1em 0 0, rgba(255,255,255, 0.75) 0 1.5em 0 0, rgba(255,255,255, 0.75) -1.1em 1.1em 0 0, rgba(255,255,255, 0.75) -1.5em 0 0 0, rgba(255,255,255, 0.75) -1.1em -1.1em 0 0, rgba(255,255,255, 0.75) 0 -1.5em 0 0, rgba(255,255,255, 0.75) 1.1em -1.1em 0 0;
+    }
+    
+    /* Animation */
+    
+    @-webkit-keyframes spinner {
+      0% {
+        -webkit-transform: rotate(0deg);
+        -moz-transform: rotate(0deg);
+        -ms-transform: rotate(0deg);
+        -o-transform: rotate(0deg);
+        transform: rotate(0deg);
+      }
+      100% {
+        -webkit-transform: rotate(360deg);
+        -moz-transform: rotate(360deg);
+        -ms-transform: rotate(360deg);
+        -o-transform: rotate(360deg);
+        transform: rotate(360deg);
+      }
+    }
+    @-moz-keyframes spinner {
+      0% {
+        -webkit-transform: rotate(0deg);
+        -moz-transform: rotate(0deg);
+        -ms-transform: rotate(0deg);
+        -o-transform: rotate(0deg);
+        transform: rotate(0deg);
+      }
+      100% {
+        -webkit-transform: rotate(360deg);
+        -moz-transform: rotate(360deg);
+        -ms-transform: rotate(360deg);
+        -o-transform: rotate(360deg);
+        transform: rotate(360deg);
+      }
+    }
+    @-o-keyframes spinner {
+      0% {
+        -webkit-transform: rotate(0deg);
+        -moz-transform: rotate(0deg);
+        -ms-transform: rotate(0deg);
+        -o-transform: rotate(0deg);
+        transform: rotate(0deg);
+      }
+      100% {
+        -webkit-transform: rotate(360deg);
+        -moz-transform: rotate(360deg);
+        -ms-transform: rotate(360deg);
+        -o-transform: rotate(360deg);
+        transform: rotate(360deg);
+      }
+    }
+    @keyframes spinner {
+      0% {
+        -webkit-transform: rotate(0deg);
+        -moz-transform: rotate(0deg);
+        -ms-transform: rotate(0deg);
+        -o-transform: rotate(0deg);
+        transform: rotate(0deg);
+      }
+      100% {
+        -webkit-transform: rotate(360deg);
+        -moz-transform: rotate(360deg);
+        -ms-transform: rotate(360deg);
+        -o-transform: rotate(360deg);
+        transform: rotate(360deg);
+      }
+    }
+ 
+  </Style>
+
 </head>
 
 <body id="page-top">
+
+  <!--  NO BORDER SPINNER -LOADER  -->
+  <div class="loading" id=loader_>Loading&#8230;</div>
+
 
   <!-- Page Wrapper -->
   <div id="wrapper">
@@ -34,9 +163,9 @@
     <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
 
       <!-- Sidebar - Brand -->
-      <a class="sidebar-brand d-flex align-items-center justify-content-center" href="index.html">
+      <a class="sidebar-brand d-flex align-items-center justify-content-center" href="checker.html">
         <div class="sidebar-brand-icon rotate-n-15">
-          <i class="fas fa-laugh-wink"></i>
+          <i class="fas fad fa-location-arrow"></i>
         </div>
         <div class="sidebar-brand-text mx-3">Where do I Stand <sup>?</sup></div>
       </a>
@@ -46,7 +175,7 @@
 
       <!-- Nav Item - Analysis Generator -->
       <li class="nav-item active">
-        <a class="nav-link" href="index.html">
+        <a class="nav-link" href="checker.html">
           <i class="fas fa-fw fa-tachometer-alt"></i>
           <span>Analysis Generator</span></a>
       </li>
@@ -55,7 +184,7 @@
       <hr class="sidebar-divider">
 
       <li class="nav-item active">
-        <a class="nav-link" href="index.html">
+        <a class="nav-link" href="savedAnalysis.html">
           <i class="fas fa-fw fa-file-archive"></i>
           <span>Saved Analysis</span></a>
       </li>
@@ -295,58 +424,12 @@
               </a>
             </div>
           </div>
-          <hr class="sidebar-divider">
-
-
+ 
           <!-- Content Row violin plot and histograms -->
-
-          <div class="row invisible" id="basic_analysis">
-
-            <div class="col-xl-4 col-lg-4">
-              <div class="card shadow mb-4">
-                <!-- Card Header - Dropdown -->
-                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-                  <h6 class="m-0 font-weight-bold text-primary">Earnings Overview</h6>
-                </div>
-                <!-- Card Body -->
-                <div class="card-body">
-                  <div id="violin_" class="chart-area"></div>
-                </div>
-              </div>
+          <hr class="sidebar-divider">
+            <div id="Analysis_Area">
             </div>
-
-            <div class="col-xl-4 col-lg-4">
-              <div class="card shadow mb-4">
-                <!-- Card Header - Dropdown -->
-                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-                  <h6 class="m-0 font-weight-bold text-primary">Earnings Overview</h6>
-                </div>
-                <!-- Card Body -->
-                <div class="card-body">
-                  <div id="barChart_2" class="chart-area"></div>
-                </div>
-              </div>
-            </div>
-
-            <div class="col-xl-4 col-lg-4">
-              <div class="card shadow mb-4">
-                <!-- Card Header - Dropdown -->
-                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-                  <h6 class="m-0 font-weight-bold text-primary">Earnings Overview</h6>
-                </div>
-                <!-- Card Body -->
-                <div class="card-body">
-                  <div id="barChart_1" class="chart-area"></div>
-                </div>
-              </div>
-            </div>
-
-          </div>
-
-          <!-- Content Row : scatter plots -->
-          <div class="row" id="scatter_section"></div>
-
-        </div>
+          
         <!-- End Page Content -->
 
       </div>
@@ -413,6 +496,13 @@
   <script src="js/scatterchart.js" language="javascript" mimetype="text/javascript"></script>
   <script src="js/demo/chart-area-demo.js"></script>
   <script src="js/demo/chart-pie-demo.js"></script>
+
+  <!-- Remove the loader -->
+  <script> 
+  $(window).on("load",function(){
+    $(".loading").fadeOut("slow");
+  });
+</script>
 
 </body>
 

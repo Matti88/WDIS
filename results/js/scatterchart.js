@@ -1,4 +1,50 @@
 
+//elements for the Analaysis Report
+const top_elements_analysis_ = 
+`<div class="row" id="basic_analysis">
+<div class="col-xl-4 col-lg-4">
+  <div class="card shadow mb-4">
+    <!-- Card Header - Dropdown -->
+    <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+      <h6 class="m-0 font-weight-bold text-primary">Earnings Overview</h6>
+    </div>
+    <!-- Card Body -->
+    <div class="card-body">
+      <div id="violin_" class="chart-area"></div>
+    </div>
+  </div>
+</div>
+
+<div class="col-xl-4 col-lg-4">
+  <div class="card shadow mb-4">
+    <!-- Card Header - Dropdown -->
+    <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+      <h6 class="m-0 font-weight-bold text-primary">Earnings Overview</h6>
+    </div>
+    <!-- Card Body -->
+    <div class="card-body">
+      <div id="barChart_2" class="chart-area"></div>
+    </div>
+  </div>
+</div>
+
+<div class="col-xl-4 col-lg-4">
+  <div class="card shadow mb-4">
+    <!-- Card Header - Dropdown -->
+    <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+      <h6 class="m-0 font-weight-bold text-primary">Earnings Overview</h6>
+    </div>
+    <!-- Card Body -->
+    <div class="card-body">
+      <div id="barChart_1" class="chart-area"></div>
+    </div>
+  </div>
+</div>
+</div>
+<!-- Content Row : scatter plots -->
+<div class="row" id="scatter_section"></div>`
+
+
 // Plotting Functions
 function scatter_avg_category_comparison(data_from_query, id_element, tranforming_function){
   
@@ -322,65 +368,19 @@ function dtransf_confrontation_scatterplot(data){
 }
 
 
-//old transformation
-function data_tansformation_CompAdvantage_lp(data){
-  data = data['Competitor_LP_Advantage'];
- 
-  x = data.map(item => {  
-      return item.q_by_Lp_0;
-  })
-
-   y = data.map(item => { 
-      return item.q_by_Lp_1;
-  })
-
-  return  [x ,  y]
-}
-
-function data_tansformation_CompAdvantage_sp(data){
-  data = data['Competitor_SP_Advantage'];
- 
-  x = data.map(item => {  
-      return item.q_by_Sp_0;
-  })
-
-   y = data.map(item => { 
-      return item.q_by_Sp_1;
-  })
-
-  return  [x ,  y]
-}
-
-function data_tansformation_MyCompany_lp(data){
-  data = data['MyCompany_LP_Advantage'];
- 
-  x = data.map(item => {  
-      return item.q_by_Lp_0;
-  })
-
-   y = data.map(item => { 
-      return item.q_by_Lp_1;
-  })
-
-  return  [x ,  y]
-}
-
-function data_tansformation_MyCompany_sp(data){
-  data = data['MyCompany_SP_Advantage'];
- 
-  x = data.map(item => {  
-      return item.q_by_Sp_0;
-  })
-
-   y = data.map(item => { 
-      return item.q_by_Sp_1;
-  })
-
-  return  [x ,  y]
-}
-
 //jQuery call functions 
 function updateGraphs(){
+
+  $('#Analysis_Area').append(top_elements_analysis_ );
+  $(".loading").fadeIn("slow");
+  
+  
+  top_elements_analysis_
+
+  $.get( '/checker/sales_analysis', 
+  function( data ) {   
+    violin_history(data);
+    });
 
 chart_part_1 = 
 `<div class="col-xl-6 col-lg-6">
@@ -392,9 +392,7 @@ chart_part_1 =
   <div id="scatter_`
         
 chart_part_2 = `" class="chart-area"></div></div></div></div>`
-  $('#basic_analysis').toggleClass('invisible visible');
- 
-
+   
   $.ajax({
     url: '/checker/advantages',
     type: 'GET',
@@ -408,6 +406,8 @@ chart_part_2 = `" class="chart-area"></div></div></div></div>`
     });
  
 
+
+
   $.get( '/checker/confronts', 
   function( data ) { 
     $(document).ready(function() {
@@ -420,21 +420,18 @@ chart_part_2 = `" class="chart-area"></div></div></div></div>`
       for(var i = 0; i <= data.length-1 ; i++) {
         scatter_avg_category_comparison(data[i], "scatter_" + i, dtransf_confrontation_scatterplot );
  
-       }
+        $(".loading").fadeOut("slow"); 
+      
+      }
      }
      ); 
     });
 
-  $.get( '/checker/sales_analysis', 
-  function( data ) {   
-    violin_history(data);
-    });
+
 
 
   
   }
 
 
-//updateGraphs();
- 
  
