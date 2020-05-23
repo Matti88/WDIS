@@ -51,6 +51,8 @@ def allowed_image(filename):
     else:
         return False
 
+
+
 # JWT APIs
 @app.route('/login', methods=['POST'])
 def login():
@@ -123,8 +125,10 @@ def sales_analysis():
 @jwt_required
 def Checker_OCpR():
     data = None
+    filename = request.headers['Side']
+    print(filename)
     if request.method == "GET":
-        data = CChe.comb_estimator('.\\uploads\\' + request.args.get('fileName'))
+        data = CChe.comb_estimator('.\\uploads\\' + filename)
     return data
 
 @app.route("/ListStreet", methods=["GET"])
@@ -139,7 +143,11 @@ def ListStreet():
 @app.route("/checker/upload-OCpR_file", methods=["GET", "POST"])
 def upload_OCpR_file():
     if request.method == "POST":
-        print(request)
+        if request.headers['Side'] == 'MyCompany':
+            print("adding this file to MyCompany Side")
+        elif request.headers['Side'] == 'Competitor':
+            print("adding this file to Competitor Side") 
+            
         if request.files:
 
             OCpR_file = request.files["file"]
@@ -152,6 +160,11 @@ def upload_OCpR_file():
             return data
 
     return ('', 204)
+
+#favicon
+@app.route('/favicon.ico')
+def favicon():
+    return send_from_directory("results/", 'favicon.ico')
 
 
 if __name__ == '__main__':

@@ -1,4 +1,73 @@
 
+var file_in_MyCompany_uploaded = false;
+var file_in_Competitor_uploaded = false;
+
+function checkTheFile(side){
+  if(side == 'MyCompany'){
+    console.log('My Company checking side');
+    $.ajax({
+      url: '/checker/Checker_OCpR_file' ,
+      headers : { 'Side':file_in_MyCompany_uploaded},
+      success: function(data){
+        console.log(data);
+      }
+     }
+    )
+
+  }
+  else{
+    console.log('Competitor checking side');
+    $.ajax({
+      url: '/checker/Checker_OCpR_file' ,
+      headers : { 'Side':file_in_Competitor_uploaded},
+      success: function(data){
+        console.log(data);
+      }
+     }
+    )
+
+  }
+
+}
+
+
+Dropzone.autoDiscover = false;
+var myDropzone1 = new Dropzone("form#my-awesome-dropzone1", { 
+    url: '/checker/upload-OCpR_file',
+    headers: {
+      'side': 'MyCompany'
+    },
+    maxFiles:1,
+    init: function() {
+      this.on('success', function(file) {
+        file_in_MyCompany_uploaded = file.upload.filename;
+      }), 
+      this.on("maxfilesexceeded", function(file) {
+            this.removeAllFiles();
+            this.addFile(file);
+      }); } 
+    }) 
+  
+var myDropzone2 = new Dropzone("form#my-awesome-dropzone2", { 
+    url: '/checker/upload-OCpR_file',
+    headers: {
+      'side': 'Competitor'
+    },
+    maxFiles:1,
+
+    init: function() {
+      this.on('success', function(file) {
+        file_in_Competitor_uploaded = file.upload.filename;
+      }), 
+      this.on("maxfilesexceeded", function(file) {
+            this.removeAllFiles();
+            this.addFile(file);
+      }); } }) 
+    
+
+
+
+
 //elements for the Analaysis Report
 const top_elements_analysis_ = 
 `<div class="row" id="basic_analysis">
