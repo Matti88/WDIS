@@ -14,6 +14,8 @@ from flask_jwt_extended import (
     get_jwt_identity, set_access_cookies,
     set_refresh_cookies, unset_jwt_cookies 
     )
+import sqlite3 as sql3
+import json
 
 app = Flask(__name__)
 app.config['RESULT_STATIC_PATH'] = "results/"
@@ -58,9 +60,10 @@ def allowed_image(filename):
 def login():
     username = request.json.get('login', None)
     password = request.json.get('password', None)
-    if username != 'test' or password != 'test':
-        return jsonify({'login': False}), 401
-        #resp = make_response(redirect(url_for('cheker')))
+ 
+    conn = sql3.connect('accounts.db')
+    c = conn.cursor()
+    t = (username,)
 
     # Create the tokens we will be sending back to the user
     access_token = create_access_token(identity=username)
@@ -68,10 +71,18 @@ def login():
 
     # Set the JWTs and the CSRF double submit protection cookies
     # in this response
-    resp = jsonify({'login': True})
-    set_access_cookies(resp, access_token)
-    set_refresh_cookies(resp, refresh_token)
-    return resp, 200
+    c.execute('SELECT * FROM users WHERE User=?', t)
+    answers = c.fetchone()
+    if username == answers[0] and password == answers[0]:
+        conn.close()
+        resp = jsonify({'login': True})
+        set_access_cookies(resp, access_token)
+        set_refresh_cookies(resp, refresh_token)
+        return resp, 200
+    else:
+        conn.close()
+        return jsonify({'login': False}), 401
+
 
 @app.route('/token/refresh', methods=['POST'])
 @jwt_refresh_token_required
@@ -140,6 +151,29 @@ def Checker_OCpR():
         data = CChe.comb_estimator('.\\uploads\\' + filename)
     return data
 
+@app.route("/checker/SaveAnalysis", methods=["POST"])
+@jwt_required
+def SaveAnalysis():
+    dict_of_savedAnalysis = request.json
+    Username_      = dict_of_savedAnalysis['Username']
+    saved_analysis_ = dict_of_savedAnalysis['analysis']  
+ 
+    try:
+        conn = sql3.connect('.\\accounts.db')
+        c = conn.cursor()
+        print(Username_)
+        saved_analysis = json.dumps(saved_analysis_)
+
+        values = ( saved_analysis, Username_)
+        sql = ''' UPDATE analysis SET storedAnalisys = ? where User= ?'''
+        c.execute(sql, values)
+        conn.commit()
+        conn.close()
+        return jsonify({'update':"correct" })
+    except:
+        return jsonify({'update':"not_correct" })
+
+ 
 @app.route("/ListStreet", methods=["GET"])
 @jwt_required
 def ListStreet():

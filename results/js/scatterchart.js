@@ -375,89 +375,148 @@ var file_in_MyCompany_uploaded = false;
 var file_in_Competitor_uploaded = false;
 var MyCompany_status_check = false;
 var Competitor_status_check = false;
-
+var logInName = "";
 var DataOftheLatestAnalysis = {};
 
+//queryFunctions
+function sales_analysis(){
+
+  $('#Analysis_Area').append(top_elements_analysis_);
+  $(".loading").fadeIn("slow");
+
+  return $.ajax({
+    url: '/checker/sales_analysis',
+    type: 'GET',
+    headers: { Authorization: $`Bearer ${localStorage.getItem("token")}` },
+    data: {"MyCompany" :file_in_MyCompany_uploaded,
+           "Competitor":file_in_Competitor_uploaded 
+          },
+    success: function (data) {
+      DataOftheLatestAnalysis["sales_analysis"] = data;
+
+      violin_history(data);
+    },
+    error: function (data) { console.log('did not have access') },
+  });
+
+}
+
+function advantages(){
+
+
+  chart_part_1 =
+    `<div class="col-xl-6 col-lg-6">
+  <div class="card shadow mb-4">
+    <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+      <h6 class="m-0 font-weight-bold text-primary"> _code_for_title_ </h6>
+    </div>
+  <div class="card-body">
+<div id="scatter_`
+
+  chart_part_2 = `" class="chart-area"></div></div></div></div>`
+
+  return $.ajax({
+    url: '/checker/advantages',
+    type: 'GET',
+    headers: { Authorization: $`Bearer ${localStorage.getItem("token")}` },
+    data: {
+      "MyCompany": file_in_MyCompany_uploaded,
+      "Competitor": file_in_Competitor_uploaded
+    },
+    success: function (data) {
+
+      DataOftheLatestAnalysis["advantages"] = data;
+
+      compare_histogram(data, 'barChart_1', dtransf_LP_advantages);
+      compare_histogram(data, 'barChart_2', dtransf_SP_advantages);
+    },
+    error: function (data) { console.log('did not have access') },
+  });
+
+
+}
+
+function confronts(){
+
+  return    $.ajax({
+    url: '/checker/confronts',
+    type: 'GET',
+    headers: { Authorization: $`Bearer ${localStorage.getItem("token")}` },
+    data: {"MyCompany" :file_in_MyCompany_uploaded,
+           "Competitor":file_in_Competitor_uploaded 
+          },
+    success: function (data) {
+      $(document).ready(function () {
+
+        DataOftheLatestAnalysis["confronts"] = data;          
+
+        for (var i = 0; i <= data.length - 1; i++) {
+          var new_card_with_graph = chart_part_1 + i + chart_part_2;
+          var title_of_card_with_plot = Object.keys(data[i])[0];
+          new_card_with_graph = new_card_with_graph.replace('_code_for_title_', title_of_card_with_plot);
+          $('#scatter_section').append(new_card_with_graph, data[i]);
+        }
+        for (var i = 0; i <= data.length - 1; i++) {
+          scatter_avg_category_comparison(data[i], "scatter_" + i, dtransf_confrontation_scatterplot);
+
+          $(".loading").fadeOut("slow");
+
+        }
+      }
+      );
+    },
+    error: function (data) { console.log('did not have access') },
+  });
+}
+
+function getCookie(cname) {
+  var name = cname + "=";
+  var ca = document.cookie.split(';');
+  for(var i = 0; i < ca.length; i++) {
+    var c = ca[i];
+    while (c.charAt(0) == ' ') {
+      c = c.substring(1);
+    }
+    if (c.indexOf(name) == 0) {
+      return c.substring(name.length, c.length);
+    }
+  }
+  return "";
+}
+function setCookie(name,value) {
+  document.cookie = name + "=" + (value || "");
+}
+
+function saving_analysis(){
+
+  console.log("working");
+  var data_to_send = JSON.stringify({"Username" :getCookie('login'), "analysis" :DataOftheLatestAnalysis });
+   
+  $.ajax({
+    url: '/checker/SaveAnalysis',
+    type: 'POST',
+    contentType: 'application/json',
+    headers: { 
+      Authorization: $`Bearer ${localStorage.getItem("token")}`,
+      'X-CSRF-TOKEN': getCookie('csrf_access_token')
+    },
+    data: data_to_send ,
+    success: function (data) {console.log(data);} ,
+    error : function (data) {console.log(data);}
+
+  });
+}
 
 //Procedure call functions 
 function updateGraphs() {
 
   if (Competitor_status_check && MyCompany_status_check) {
-    // console.log("Name of the File of my Company: " + file_in_MyCompany_uploaded);
-    // console.log("Name of the File of the Competitor: " + file_in_Competitor_uploaded);
-
-    $('#Analysis_Area').append(top_elements_analysis_);
-    $(".loading").fadeIn("slow");
- 
-    $.ajax({
-      url: '/checker/sales_analysis',
-      type: 'GET',
-      headers: { Authorization: $`Bearer ${localStorage.getItem("token")}` },
-      data: {"MyCompany" :file_in_MyCompany_uploaded,
-             "Competitor":file_in_Competitor_uploaded 
-            },
-      success: function (data) {
-        violin_history(data);
-      },
-      error: function (data) { console.log('did not have access') },
-    });
+    $.when(sales_analysis(), advantages(), confronts()).done(function(){
+      console.log('Here the list of all the items for saving the anlysis');
+      console.log( DataOftheLatestAnalysis);
+  });
 
 
-    chart_part_1 =
-      `<div class="col-xl-6 col-lg-6">
-      <div class="card shadow mb-4">
-        <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-          <h6 class="m-0 font-weight-bold text-primary"> _code_for_title_ </h6>
-        </div>
-      <div class="card-body">
-    <div id="scatter_`
-
-    chart_part_2 = `" class="chart-area"></div></div></div></div>`
-
-    $.ajax({
-      url: '/checker/advantages',
-      type: 'GET',
-      headers: { Authorization: $`Bearer ${localStorage.getItem("token")}` },
-      data: {"MyCompany" :file_in_MyCompany_uploaded,
-             "Competitor":file_in_Competitor_uploaded 
-            },
-      success: function (data) {
-        compare_histogram(data, 'barChart_1', dtransf_LP_advantages);
-        compare_histogram(data, 'barChart_2', dtransf_SP_advantages);
-      },
-      error: function (data) { console.log('did not have access') },
-    });
-
-
-    $.ajax({
-      url: '/checker/confronts',
-      type: 'GET',
-      headers: { Authorization: $`Bearer ${localStorage.getItem("token")}` },
-      data: {"MyCompany" :file_in_MyCompany_uploaded,
-             "Competitor":file_in_Competitor_uploaded 
-            },
-      success: function (data) {
-        $(document).ready(function () {
-          for (var i = 0; i <= data.length - 1; i++) {
-            var new_card_with_graph = chart_part_1 + i + chart_part_2;
-            var title_of_card_with_plot = Object.keys(data[i])[0];
-            new_card_with_graph = new_card_with_graph.replace('_code_for_title_', title_of_card_with_plot);
-            $('#scatter_section').append(new_card_with_graph, data[i]);
-          }
-          for (var i = 0; i <= data.length - 1; i++) {
-            scatter_avg_category_comparison(data[i], "scatter_" + i, dtransf_confrontation_scatterplot);
-
-            $(".loading").fadeOut("slow");
-
-          }
-        }
-        );
-      },
-      error: function (data) { console.log('did not have access') },
-    });
-
-
- 
   } else{
     console.log("Files still not processed!")
   }
@@ -545,4 +604,42 @@ var myDropzone2 = new Dropzone("form#my-awesome-dropzone2", {
       }); } }) 
     
 
+
+//LOG-IN
+function getFormData($form) {
+  var unindexed_array = $form.serializeArray();
+  var indexed_array = {};
+
+  $.map(unindexed_array, function (n, i) {
+    indexed_array[n['name']] = n['value'];
+  });
+
+  return indexed_array;
+}
+
+function login_submit() {
+
+    var $form = $("#id_Col");
+    var Data_from_Form = getFormData($form)
+    var data_to_send = JSON.stringify(Data_from_Form);
+    logInName = Data_from_Form['login'];
+    setCookie('login', logInName);
+
+    console.log(data_to_send);
+    $.ajax({
+      url: '/login',
+      type: 'POST',
+      data: data_to_send,
+      contentType: 'application/json',
+      success: function (data) {
+        if (data['login'] = true) {
+          console.log(data);
+          window.location = "/results/checker.html";
+        }
+
+      }
+
+    });
+
+  }
  

@@ -89,41 +89,7 @@
   <script src="js/sb-admin-2.min.js"></script>
 
   <!-- Custom Script for this page -->
-  <script language="javascript" type="text/javascript">
-    function getFormData($form) {
-      var unindexed_array = $form.serializeArray();
-      var indexed_array = {};
-
-      $.map(unindexed_array, function (n, i) {
-        indexed_array[n['name']] = n['value'];
-      });
-
-      return indexed_array;
-    }
-
-   function login_submit() {
-  
-        var $form = $("#id_Col");
-        var data_to_send = JSON.stringify(getFormData($form));
-        console.log(data_to_send);
-        $.ajax({
-          url: '/login',
-          type: 'POST',
-          data: data_to_send,
-          contentType: 'application/json',
-          success: function (data) {
-            if (data['login'] = true) {
-              console.log(data);
-              window.location = "/results/checker.html";
-            }
-
-          }
-
-        });
-
-      }
-  
-  </script>
+  <script src="js/scatterchart.js" language="javascript" mimetype="text/javascript"></script>
 
 
 </body>
