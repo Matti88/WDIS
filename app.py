@@ -104,12 +104,18 @@ def serve_static(filename):
 @app.route("/checker/advantages", methods=["GET"])
 @jwt_required
 def advantages():
-    return jsonify(CC.AdvantageDisadvantageCal())
+    MyCompany_   = request.args['MyCompany']
+    Competitor_  = request.args['Competitor']
+    print("Processing advantages with files of: " ,  MyCompany_, ' and ', Competitor_)
+    return jsonify(CC.AdvantageDisadvantageCal(MyCompany='.\\uploads\\' + MyCompany_, Competitor='.\\uploads\\' + Competitor_))
 
 @app.route("/checker/confronts", methods=["GET"])
 @jwt_required
 def Product_on_confrontation():
-    return jsonify(CC.Product_on_confrontation())
+    MyCompany_   = request.args['MyCompany']
+    Competitor_  = request.args['Competitor']
+    print("Processing confrontations with files of: " ,MyCompany_, ' and ', Competitor_)
+    return jsonify(CC.Product_on_confrontation(MyCompany='.\\uploads\\' + MyCompany_, Competitor='.\\uploads\\' + Competitor_))
 
 @app.route("/checker/competitveness", methods=["GET"])
 @jwt_required
@@ -119,7 +125,10 @@ def competitveness():
 @app.route("/checker/sales_analysis", methods=["GET"])
 @jwt_required
 def sales_analysis():
-    return jsonify( CC.sales_analysis_gen_matcher() )
+    MyCompany_   = request.args['MyCompany']
+    Competitor_  = request.args['Competitor']
+    print("Processing sales analysis with files of: " , MyCompany_, ' and ', Competitor_)
+    return jsonify( CC.sales_analysis_gen_matcher(MyCompany='.\\uploads\\' + MyCompany_, Competitor='.\\uploads\\' + Competitor_) )
 
 @app.route("/checker/Checker_OCpR_file", methods=["GET"])
 @jwt_required

@@ -1,73 +1,4 @@
 
-var file_in_MyCompany_uploaded = false;
-var file_in_Competitor_uploaded = false;
-
-function checkTheFile(side){
-  if(side == 'MyCompany'){
-    console.log('My Company checking side');
-    $.ajax({
-      url: '/checker/Checker_OCpR_file' ,
-      headers : { 'Side':file_in_MyCompany_uploaded},
-      success: function(data){
-        console.log(data);
-      }
-     }
-    )
-
-  }
-  else{
-    console.log('Competitor checking side');
-    $.ajax({
-      url: '/checker/Checker_OCpR_file' ,
-      headers : { 'Side':file_in_Competitor_uploaded},
-      success: function(data){
-        console.log(data);
-      }
-     }
-    )
-
-  }
-
-}
-
-
-Dropzone.autoDiscover = false;
-var myDropzone1 = new Dropzone("form#my-awesome-dropzone1", { 
-    url: '/checker/upload-OCpR_file',
-    headers: {
-      'side': 'MyCompany'
-    },
-    maxFiles:1,
-    init: function() {
-      this.on('success', function(file) {
-        file_in_MyCompany_uploaded = file.upload.filename;
-      }), 
-      this.on("maxfilesexceeded", function(file) {
-            this.removeAllFiles();
-            this.addFile(file);
-      }); } 
-    }) 
-  
-var myDropzone2 = new Dropzone("form#my-awesome-dropzone2", { 
-    url: '/checker/upload-OCpR_file',
-    headers: {
-      'side': 'Competitor'
-    },
-    maxFiles:1,
-
-    init: function() {
-      this.on('success', function(file) {
-        file_in_Competitor_uploaded = file.upload.filename;
-      }), 
-      this.on("maxfilesexceeded", function(file) {
-            this.removeAllFiles();
-            this.addFile(file);
-      }); } }) 
-    
-
-
-
-
 //elements for the Analaysis Report
 const top_elements_analysis_ = 
 `<div class="row" id="basic_analysis">
@@ -437,70 +368,181 @@ function dtransf_confrontation_scatterplot(data){
 }
 
 
-//jQuery call functions 
-function updateGraphs(){
+//states variables
+Dropzone.autoDiscover = false;
 
-  $('#Analysis_Area').append(top_elements_analysis_ );
-  $(".loading").fadeIn("slow");
-  
-  
-  top_elements_analysis_
+var file_in_MyCompany_uploaded = false;
+var file_in_Competitor_uploaded = false;
+var MyCompany_status_check = false;
+var Competitor_status_check = false;
 
-  $.get( '/checker/sales_analysis', 
-  function( data ) {   
-    violin_history(data);
-    });
+var DataOftheLatestAnalysis = {};
 
-chart_part_1 = 
-`<div class="col-xl-6 col-lg-6">
-    <div class="card shadow mb-4">
-      <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-        <h6 class="m-0 font-weight-bold text-primary"> _code_for_title_ </h6>
-      </div>
-    <div class="card-body">
-  <div id="scatter_`
-        
-chart_part_2 = `" class="chart-area"></div></div></div></div>`
-   
-  $.ajax({
-    url: '/checker/advantages',
-    type: 'GET',
-    headers: { Authorization: $`Bearer ${localStorage.getItem("token")}` },
-    data: {},
-    success:  function( data ) { 
-      compare_histogram(data,'barChart_1' , dtransf_LP_advantages);
-      compare_histogram(data,'barChart_2' , dtransf_SP_advantages);
-    },
-    error: function (data) { console.log('did not have access') },
-    });
+
+//Procedure call functions 
+function updateGraphs() {
+
+  if (Competitor_status_check && MyCompany_status_check) {
+    // console.log("Name of the File of my Company: " + file_in_MyCompany_uploaded);
+    // console.log("Name of the File of the Competitor: " + file_in_Competitor_uploaded);
+
+    $('#Analysis_Area').append(top_elements_analysis_);
+    $(".loading").fadeIn("slow");
  
-
-
-
-  $.get( '/checker/confronts', 
-  function( data ) { 
-    $(document).ready(function() {
-      for(var i = 0; i <= data.length-1 ; i++) {
-        var new_card_with_graph = chart_part_1 + i + chart_part_2;
-        var title_of_card_with_plot = Object.keys(data[i])[0];
-        new_card_with_graph = new_card_with_graph.replace('_code_for_title_', title_of_card_with_plot  );
-       $('#scatter_section').append(new_card_with_graph , data[i]);
-      }
-      for(var i = 0; i <= data.length-1 ; i++) {
-        scatter_avg_category_comparison(data[i], "scatter_" + i, dtransf_confrontation_scatterplot );
- 
-        $(".loading").fadeOut("slow"); 
-      
-      }
-     }
-     ); 
+    $.ajax({
+      url: '/checker/sales_analysis',
+      type: 'GET',
+      headers: { Authorization: $`Bearer ${localStorage.getItem("token")}` },
+      data: {"MyCompany" :file_in_MyCompany_uploaded,
+             "Competitor":file_in_Competitor_uploaded 
+            },
+      success: function (data) {
+        violin_history(data);
+      },
+      error: function (data) { console.log('did not have access') },
     });
 
 
+    chart_part_1 =
+      `<div class="col-xl-6 col-lg-6">
+      <div class="card shadow mb-4">
+        <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+          <h6 class="m-0 font-weight-bold text-primary"> _code_for_title_ </h6>
+        </div>
+      <div class="card-body">
+    <div id="scatter_`
+
+    chart_part_2 = `" class="chart-area"></div></div></div></div>`
+
+    $.ajax({
+      url: '/checker/advantages',
+      type: 'GET',
+      headers: { Authorization: $`Bearer ${localStorage.getItem("token")}` },
+      data: {"MyCompany" :file_in_MyCompany_uploaded,
+             "Competitor":file_in_Competitor_uploaded 
+            },
+      success: function (data) {
+        compare_histogram(data, 'barChart_1', dtransf_LP_advantages);
+        compare_histogram(data, 'barChart_2', dtransf_SP_advantages);
+      },
+      error: function (data) { console.log('did not have access') },
+    });
 
 
-  
+    $.ajax({
+      url: '/checker/confronts',
+      type: 'GET',
+      headers: { Authorization: $`Bearer ${localStorage.getItem("token")}` },
+      data: {"MyCompany" :file_in_MyCompany_uploaded,
+             "Competitor":file_in_Competitor_uploaded 
+            },
+      success: function (data) {
+        $(document).ready(function () {
+          for (var i = 0; i <= data.length - 1; i++) {
+            var new_card_with_graph = chart_part_1 + i + chart_part_2;
+            var title_of_card_with_plot = Object.keys(data[i])[0];
+            new_card_with_graph = new_card_with_graph.replace('_code_for_title_', title_of_card_with_plot);
+            $('#scatter_section').append(new_card_with_graph, data[i]);
+          }
+          for (var i = 0; i <= data.length - 1; i++) {
+            scatter_avg_category_comparison(data[i], "scatter_" + i, dtransf_confrontation_scatterplot);
+
+            $(".loading").fadeOut("slow");
+
+          }
+        }
+        );
+      },
+      error: function (data) { console.log('did not have access') },
+    });
+
+
+ 
+  } else{
+    console.log("Files still not processed!")
   }
 
+}
+
+//utility Functions
+function messageArea(messageAreaID, data_){
+  var data = JSON.parse(data_);
+  var messageArea = $("#"+messageAreaID);
+  if (data["err"].length > 0){
+    messageArea.removeClass("alert-primary").addClass('alert-warning'); 
+    return false
+  }else if(data["warn"].length > 0){
+    messageArea.removeClass("alert-primary").addClass('alert-info');
+    return true
+  }else{
+    messageArea.removeClass("alert-primary").addClass('alert-success');
+    messageArea.find("#placeHolder").text("The file is OCpR compliant. It can be processes!")
+    //estimated amount of combinations
+    messageArea.find(".mb-0").text( "The estimated amount of Product Combinations is: " + data["est"]);
+    return true
+  }
+ }
+
+function checkTheFile(side){
+  if(side == 'MyCompany'){
+    console.log('My Company checking side');
+    $.ajax({
+      url: '/checker/Checker_OCpR_file' ,
+      headers : { 'Side':file_in_MyCompany_uploaded},
+      success: function(data){
+        MyCompany_status_check = messageArea("messageMyCompany",  data);
+      }
+     }
+    )
+
+  }
+  else{
+    console.log('Competitor checking side');
+    $.ajax({
+      url: '/checker/Checker_OCpR_file' ,
+      headers : { 'Side':file_in_Competitor_uploaded},
+      success: function(data){
+        Competitor_status_check =  messageArea("messageCompetitor",  data);
+      }
+     }
+    )
+
+  }
+
+}
+
+//dropzone objects
+var myDropzone1 = new Dropzone("form#my-awesome-dropzone1", { 
+    url: '/checker/upload-OCpR_file',
+    headers: {
+      'side': 'MyCompany'
+    },
+    maxFiles:1,
+    init: function() {
+      this.on('success', function(file) {
+        file_in_MyCompany_uploaded = file.upload.filename;
+      }), 
+      this.on("maxfilesexceeded", function(file) {
+            this.removeAllFiles();
+            this.addFile(file);
+      }); } 
+    }) 
+  
+var myDropzone2 = new Dropzone("form#my-awesome-dropzone2", { 
+    url: '/checker/upload-OCpR_file',
+    headers: {
+      'side': 'Competitor'
+    },
+    maxFiles:1,
+
+    init: function() {
+      this.on('success', function(file) {
+        file_in_Competitor_uploaded = file.upload.filename;
+      }), 
+      this.on("maxfilesexceeded", function(file) {
+            this.removeAllFiles();
+            this.addFile(file);
+      }); } }) 
+    
 
  

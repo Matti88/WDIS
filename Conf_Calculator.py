@@ -377,11 +377,11 @@ def ThreatsOpportunitiesCal(MyCompany=r'./uploads/MyCompany.xls', Competitor=r'.
 
     return Threats_and_Opportunities
 
-def sales_analysis_gen_matcher(path_to_the_file = r'./uploads/MyCompany.xls',  MyCompany=r'./uploads/MyCompany.xls', Competitor=r'./uploads/Competitor.xls', prices_tables=['Street_Prices', 'List_Prices'], order_tables = ['OrderData']):
-    '''
+def sales_analysis_gen_matcher(  MyCompany=r'./uploads/MyCompany.xls', Competitor=r'./uploads/Competitor.xls', prices_tables=['Street_Prices', 'List_Prices'], order_tables = ['OrderData']):
+    ''' path_to_the_file = r'./uploads/MyCompany.xls',
     Process Function: matches all the order data to a single product and it assigns to the order also its price and tags
     '''
-    OCpR, Prices, Orders = dataframes_splitter(path_to_the_file = r'./uploads/MyCompany.xls', prices_tables=['Street_Prices', 'List_Prices'], order_tables = ['OrderData'])
+    OCpR, Prices, Orders = dataframes_splitter(path_to_the_file=MyCompany, prices_tables=['Street_Prices', 'List_Prices'], order_tables = ['OrderData'])
     finalizedModel = loop_thru_dataframes(OCpR)
     finalizedModel = finalizedModel[ list(filter( lambda x : 'tag' not in x,  finalizedModel.columns)) ]
     config_boundles = pd.DataFrame()
