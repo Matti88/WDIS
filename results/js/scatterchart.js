@@ -507,6 +507,7 @@ function saving_analysis(){
   });
 }
 
+
 //Procedure call functions 
 function updateGraphs() {
 
@@ -520,6 +521,68 @@ function updateGraphs() {
   } else{
     console.log("Files still not processed!")
   }
+
+}
+
+function updateGraphs_WithSavedData(){
+
+  $.ajax({
+    url: '/checker/RetrievedSavedAnalysis',
+    type: 'GET',
+    contentType: 'application/json',
+    headers: { 
+      Authorization: $`Bearer ${localStorage.getItem("token")}`,
+      'X-CSRF-TOKEN': getCookie('csrf_access_token')
+    },
+    success: function (data) {
+      //JSON.stringify
+      dataSaved = JSON.parse(data);
+      console.log(dataSaved);
+      
+      //violin plot section
+      $('#Analysis_Area').append(top_elements_analysis_);
+      $(".loading").fadeIn("slow");
+      salesdata =  dataSaved["sales_analysis"];
+      violin_history(salesdata);
+    
+      //advantages plot section
+      chart_part_1 =
+      `<div class="col-xl-6 col-lg-6">
+        <div class="card shadow mb-4">
+          <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+            <h6 class="m-0 font-weight-bold text-primary"> _code_for_title_ </h6>
+          </div>
+        <div class="card-body">
+      <div id="scatter_`      
+      chart_part_2 = `" class="chart-area"></div></div></div></div>`
+      advantagedata = dataSaved["advantages"];
+      compare_histogram(advantagedata, 'barChart_1', dtransf_LP_advantages);
+      compare_histogram(advantagedata, 'barChart_2', dtransf_SP_advantages);
+    
+    
+      //confronting charts
+      confrontData = dataSaved["confronts"];          
+      for (var i = 0; i <= confrontData.length - 1; i++) {
+        var new_card_with_graph = chart_part_1 + i + chart_part_2;
+        var title_of_card_with_plot = Object.keys(confrontData[i])[0];
+        new_card_with_graph = new_card_with_graph.replace('_code_for_title_', title_of_card_with_plot);
+        $('#scatter_section').append(new_card_with_graph, confrontData[i]);
+      }
+      for (var i = 0; i <= confrontData.length - 1; i++) {
+        scatter_avg_category_comparison(confrontData[i], "scatter_" + i, dtransf_confrontation_scatterplot);
+    
+        $(".loading").fadeOut("slow");
+    
+      }
+
+
+    } ,
+    error : function (data) {console.log(data);}
+
+  });
+
+
+
 
 }
 

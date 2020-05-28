@@ -9,6 +9,7 @@ from flask import (Flask,
             ,send_from_directory, current_app
             ) 
 from flask_jwt_extended import (
+    get_jwt_identity,
     JWTManager, jwt_required, create_access_token,
     jwt_refresh_token_required, create_refresh_token,
     get_jwt_identity, set_access_cookies,
@@ -156,14 +157,14 @@ def Checker_OCpR():
 def SaveAnalysis():
     dict_of_savedAnalysis = request.json
     Username_      = dict_of_savedAnalysis['Username']
+    #Possibly to change it to this item
+    indetity =get_jwt_identity() 
     saved_analysis_ = dict_of_savedAnalysis['analysis']  
  
     try:
         conn = sql3.connect('.\\accounts.db')
         c = conn.cursor()
-        print(Username_)
         saved_analysis = json.dumps(saved_analysis_)
-
         values = ( saved_analysis, Username_)
         sql = ''' UPDATE analysis SET storedAnalisys = ? where User= ?'''
         c.execute(sql, values)
@@ -173,7 +174,26 @@ def SaveAnalysis():
     except:
         return jsonify({'update':"not_correct" })
 
+
+@app.route("/checker/RetrievedSavedAnalysis", methods=["GET"])
+@jwt_required
+def RetrievedSavedAnalysis():
+    indetity =get_jwt_identity() 
+    print(indetity)  
  
+    try:
+        conn = sql3.connect('.\\accounts.db')
+        c = conn.cursor()
+        values = ( indetity, )
+        sql = ''' select storedAnalisys from analysis where User= ?'''
+        c.execute(sql, values)
+        saved_analysis = c.fetchone()[0]
+        conn.close()
+        return saved_analysis
+    except:
+        return jsonify({  indetity: "error"})
+    
+
 @app.route("/ListStreet", methods=["GET"])
 @jwt_required
 def ListStreet():
@@ -182,6 +202,10 @@ def ListStreet():
         file_ = os.getcwd() + r"\uploads" + '\\' + name_of_the_file 
         resultForChartJS = CC.ListStreetCal(file_, D3_ChartJS = False)
     return jsonify(resultForChartJS)
+
+
+
+
 
 @app.route("/checker/upload-OCpR_file", methods=["GET", "POST"])
 def upload_OCpR_file():
