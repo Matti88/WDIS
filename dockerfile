@@ -5,10 +5,10 @@ FROM python:3.6-buster
 WORKDIR /app
 
 # Copy the current directory contents into the container at /app 
-ADD . /app
+ADD . .
 
 # Install the dependencies
 RUN pip install -r requirements.txt
 
 # run the command to start uWSGI
-CMD ["python app.py"]
+CMD ["python3", "/app/app.py"]
