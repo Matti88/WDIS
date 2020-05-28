@@ -2,11 +2,11 @@ import pandas as pd
 import numpy as np
 import copy 
 import json
-# import importlib.util
-# spec = importlib.util.spec_from_file_location("string_sum", "C:\\Users\\zuzan\\Desktop\\Projects\\WDIS\\string_sum.pyd")
-# sr = importlib.util.module_from_spec(spec)
-# spec.loader.exec_module(sr)
-import string_sum as sr
+import importlib.util
+spec = importlib.util.spec_from_file_location("string_sum", "./string_sum.so")
+sr = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(sr)
+#import string_sum as sr
  
 #FUNCTIONS
 def filter_out_descriptions_and_non_tags(df):

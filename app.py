@@ -17,6 +17,15 @@ from flask_jwt_extended import (
     )
 import sqlite3 as sql3
 import json
+from sys import platform as _platform
+isLinuzSystem = True
+if _platform == "linux" or _platform == "linux2":
+    print(_platform)
+    isLinuzSystem = True
+else:
+    print(_platform)
+    isLinuzSystem = True 
+
 
 app = Flask(__name__)
 app.config['RESULT_STATIC_PATH'] = "results/"
@@ -40,7 +49,10 @@ app.config['JWT_SECRET_KEY'] = 'super-secret'  # Change this!
 jwt = JWTManager(app)
 
 #address with values for the uploads and types of files
-app.config["OCpR_file_UPLOADS"] = ".\\uploads"
+if isLinuzSystem:
+    app.config["OCpR_file_UPLOADS"] = "./uploads"
+else:
+    app.config["OCpR_file_UPLOADS"] = ".\\uploads"
 app.config["ALLOWED_OCpR_file_EXTENSIONS"] = ["XLSX", "XLS"]
 
     
@@ -119,7 +131,10 @@ def advantages():
     MyCompany_   = request.args['MyCompany']
     Competitor_  = request.args['Competitor']
     print("Processing advantages with files of: " ,  MyCompany_, ' and ', Competitor_)
-    return jsonify(CC.AdvantageDisadvantageCal(MyCompany='.\\uploads\\' + MyCompany_, Competitor='.\\uploads\\' + Competitor_))
+    if isLinuzSystem:
+        return jsonify(CC.AdvantageDisadvantageCal(MyCompany='./uploads/' + MyCompany_, Competitor='./uploads/' + Competitor_))
+    else:
+        return jsonify(CC.AdvantageDisadvantageCal(MyCompany='.\\uploads\\' + MyCompany_, Competitor='.\\uploads\\' + Competitor_))
 
 @app.route("/checker/confronts", methods=["GET"])
 @jwt_required
@@ -127,7 +142,12 @@ def Product_on_confrontation():
     MyCompany_   = request.args['MyCompany']
     Competitor_  = request.args['Competitor']
     print("Processing confrontations with files of: " ,MyCompany_, ' and ', Competitor_)
-    return jsonify(CC.Product_on_confrontation(MyCompany='.\\uploads\\' + MyCompany_, Competitor='.\\uploads\\' + Competitor_))
+    if isLinuzSystem:
+        return jsonify(CC.Product_on_confrontation(MyCompany='./uploads/' + MyCompany_, Competitor='./uploads/' + Competitor_))
+    else:
+        return jsonify(CC.Product_on_confrontation(MyCompany='.\\uploads\\' + MyCompany_, Competitor='.\\uploads\\' + Competitor_))
+
+ 
 
 @app.route("/checker/competitveness", methods=["GET"])
 @jwt_required
@@ -140,7 +160,12 @@ def sales_analysis():
     MyCompany_   = request.args['MyCompany']
     Competitor_  = request.args['Competitor']
     print("Processing sales analysis with files of: " , MyCompany_, ' and ', Competitor_)
-    return jsonify( CC.sales_analysis_gen_matcher(MyCompany='.\\uploads\\' + MyCompany_, Competitor='.\\uploads\\' + Competitor_) )
+    if isLinuzSystem:
+        return jsonify(CC.sales_analysis_gen_matcher(MyCompany='./uploads/' + MyCompany_, Competitor='./uploads/' + Competitor_))
+    else:
+        return jsonify( CC.sales_analysis_gen_matcher(MyCompany='.\\uploads\\' + MyCompany_, Competitor='.\\uploads\\' + Competitor_) )
+
+    
 
 @app.route("/checker/Checker_OCpR_file", methods=["GET"])
 @jwt_required
@@ -149,7 +174,10 @@ def Checker_OCpR():
     filename = request.headers['Side']
     print(filename)
     if request.method == "GET":
-        data = CChe.comb_estimator('.\\uploads\\' + filename)
+        if isLinuzSystem:
+            data = CChe.comb_estimator('./uploads/' + filename)
+        else:
+            data = CChe.comb_estimator('.\\uploads\\' + filename)
     return data
 
 @app.route("/checker/SaveAnalysis", methods=["POST"])
@@ -162,7 +190,10 @@ def SaveAnalysis():
     saved_analysis_ = dict_of_savedAnalysis['analysis']  
  
     try:
-        conn = sql3.connect('.\\accounts.db')
+        if isLinuzSystem:
+            conn = sql3.connect('./accounts.db')
+        else:
+            conn = sql3.connect('.\\accounts.db')
         c = conn.cursor()
         saved_analysis = json.dumps(saved_analysis_)
         values = ( saved_analysis, Username_)
@@ -182,7 +213,10 @@ def RetrievedSavedAnalysis():
     print(indetity)  
  
     try:
-        conn = sql3.connect('.\\accounts.db')
+        if isLinuzSystem:
+            conn = sql3.connect('./accounts.db')
+        else:
+            conn = sql3.connect('.\\accounts.db')
         c = conn.cursor()
         values = ( indetity, )
         sql = ''' select storedAnalisys from analysis where User= ?'''
@@ -199,7 +233,11 @@ def RetrievedSavedAnalysis():
 def ListStreet():
     if request.method == "GET":
         name_of_the_file = request.args.get('fileName')
-        file_ = os.getcwd() + r"\uploads" + '\\' + name_of_the_file 
+        if isLinuzSystem:
+            file_ = os.getcwd() + r"/uploads" + '/' + name_of_the_file 
+        else:
+            file_ = os.getcwd() + r"\uploads" + '\\' + name_of_the_file 
+
         resultForChartJS = CC.ListStreetCal(file_, D3_ChartJS = False)
     return jsonify(resultForChartJS)
 
