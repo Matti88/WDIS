@@ -273,4 +273,5 @@ def favicon():
 
 
 if __name__ == '__main__':
+    print("This is a standard FUCK YOU!")
     app.run()
